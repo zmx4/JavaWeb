@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>首页</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 32px;
+        }
+
+        .welcome {
+            color: #666;
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+
+        .user-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .user-info-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .user-info-item:last-child {
+            border-bottom: none;
+        }
+
+        .label {
+            font-weight: 600;
+            color: #555;
+            display: inline-block;
+            width: 100px;
+        }
+
+        .value {
+            color: #333;
+        }
+
+        button {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎉 欢迎登录</h1>
+        <p class="welcome">恭喜您成功登录系统！</p>
+
+        <div class="user-info">
+            <div class="user-info-item">
+                <span class="label">用户ID：</span>
+                <span class="value" th:text="${user.id}"></span>
+            </div>
+            <div class="user-info-item">
+                <span class="label">用户名：</span>
+                <span class="value" th:text="${user.username}"></span>
+            </div>
+            <div class="user-info-item">
+                <span class="label">邮箱：</span>
+                <span class="value" th:text="${user.email != null ? user.email : '未设置'}"></span>
+            </div>
+            <div class="user-info-item">
+                <span class="label">注册时间：</span>
+                <span class="value" th:text="${user.createTime}"></span>
+            </div>
+        </div>
+
+        <a th:href="@{/logout}" style="text-decoration: none;">
+            <button>退出登录</button>
+        </a>
+    </div>
+</body>
+</html>
