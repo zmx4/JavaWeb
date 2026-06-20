@@ -141,6 +141,9 @@
         </div>
 
         <div class="actions">
+            <a th:href="@{/products}" style="text-decoration: none;">
+                <button type="button">浏览商品</button>
+            </a>
             <a th:if="${userIsAdmin}" th:href="@{/admin/users}" style="text-decoration: none;">
                 <button type="button">用户管理</button>
             </a>
