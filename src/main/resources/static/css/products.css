@@ -212,3 +212,73 @@ body {
     color: #888;
     margin-left: auto;
 }
+
+/* 购物车徽标 */
+.cart-link {
+    position: relative;
+}
+.cart-badge {
+    position: absolute;
+    top: -8px;
+    right: -14px;
+    background: #e74c3c;
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    line-height: 18px;
+    border-radius: 9px;
+    text-align: center;
+    padding: 0 4px;
+}
+
+/* 商品操作区 */
+.product-action {
+    padding: 0 16px 16px;
+}
+.add-cart-btn {
+    width: 100%;
+    padding: 9px 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s;
+}
+.add-cart-btn:hover:not(:disabled) {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+.add-cart-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+.add-cart-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+/* Toast提示 */
+.toast {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 24px;
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 9999;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    animation: toastIn 0.3s ease;
+}
+.toast.success { background: #27ae60; }
+.toast.error   { background: #e74c3c; }
+@keyframes toastIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}

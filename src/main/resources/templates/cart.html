@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>购物车</title>
+    <link rel="stylesheet" th:href="@{/css/cart.css}">
+</head>
+<body>
+    <div class="navbar">
+        <h1>我的购物车</h1>
+        <div class="navbar-links">
+            <a th:href="@{/home}">首页</a>
+            <a th:href="@{/products}">浏览商品</a>
+            <a th:href="@{/logout}">退出登录</a>
+        </div>
+    </div>
+
+    <div class="cart-container">
+        <!-- 加载状态 -->
+        <div class="cart-loading" id="cartLoading">
+            <div class="spinner"></div>
+            <p>加载中...</p>
+        </div>
+
+        <!-- 购物车内容 -->
+        <div class="cart-card" id="cartCard" style="display:none;">
+            <div class="cart-header">
+                <h2>购物车商品</h2>
+                <span class="cart-count" id="cartCount"></span>
+            </div>
+            <ul class="cart-list" id="cartList"></ul>
+            <div class="cart-footer">
+                <div class="cart-total">
+                    合计：<span class="total-amount" id="totalAmount">0.00</span>
+                </div>
+                <a class="continue-shopping" th:href="@{/products}">继续购物</a>
+            </div>
+        </div>
+
+        <!-- 空状态 -->
+        <div class="cart-empty" id="cartEmpty" style="display:none;">
+            <div class="cart-empty-icon">🛒</div>
+            <p>购物车还是空的，快去挑选商品吧！</p>
+            <a th:href="@{/products}">去购物</a>
+        </div>
+    </div>
+
+    <script th:src="@{/js/jquery-4.0.0.min.js}"></script>
+    <script>
+        $(function () {
+
+            var icons = ['🛍️', '👕', '📱', '💻', '🎮', '📚', '🍔', '⚽', '💄', '🏠'];
+
+            // 加载购物车
+            function loadCart() {
+                $('#cartLoading').show();
+                $('#cartCard, #cartEmpty').hide();
+
+                $.ajax({
+                    url: '/api/cart',
+                    method: 'GET',
+                    dataType: 'json',
+                    success: function (data) {
+                        $('#cartLoading').hide();
+                        renderCart(data);
+                    },
+                    error: function () {
+                        $('#cartLoading').hide();
+                        showToast('加载失败，请刷新重试', 'error');
+                    }
+                });
+            }
+
+            // 渲染购物车
+            function renderCart(data) {
+                if (!data.items || data.items.length === 0) {
+                    $('#cartEmpty').show();
+                    return;
+                }
+
+                $('#cartCount').text('共 ' + data.count + ' 件商品');
+                $('#totalAmount').text(data.total);
+
+                var $list = $('#cartList');
+                $list.empty();
+
+                $.each(data.items, function (i, item) {
+                    var icon = icons[i % icons.length];
+                    var html = ''
+                        + '<li class="cart-item" data-id="' + item.id + '">'
+                        + '  <div class="cart-item-icon">' + icon + '</div>'
+                        + '  <div class="cart-item-info">'
+                        + '    <div class="cart-item-name">' + escapeHtml(item.productName) + '</div>'
+                        + '    <div class="cart-item-price">¥' + item.productPrice + ' / 件</div>'
+                        + '  </div>'
+                        + '  <div class="cart-item-qty">'
+                        + '    <button class="qty-btn qty-minus" data-id="' + item.id + '" data-qty="' + (item.quantity - 1) + '"'
+                        + (item.quantity <= 1 ? ' disabled' : '') + '>−</button>'
+                        + '    <input class="qty-input" type="number" value="' + item.quantity + '"'
+                        + '      data-id="' + item.id + '" min="1" max="' + item.productStock + '">'
+                        + '    <button class="qty-btn qty-plus" data-id="' + item.id + '" data-qty="' + (item.quantity + 1) + '"'
+                        + (item.quantity >= item.productStock ? ' disabled' : '') + '>+</button>'
+                        + '  </div>'
+                        + '  <div class="cart-item-subtotal">'
+                        + '    <span class="amount">' + item.subtotal + '</span>'
+                        + '  </div>'
+                        + '  <button class="cart-item-remove" data-id="' + item.id + '" title="移除">✕</button>'
+                        + '</li>';
+
+                    $list.append(html);
+                });
+
+                $('#cartCard').show();
+            }
+
+            // 更新数量
+            function updateQty(cartItemId, quantity) {
+                $.ajax({
+                    url: '/api/cart/' + cartItemId + '?quantity=' + quantity,
+                    method: 'PUT',
+                    dataType: 'json',
+                    success: function () {
+                        loadCart();
+                    },
+                    error: function (xhr) {
+                        var msg = '更新失败';
+                        try { msg = JSON.parse(xhr.responseText).message || msg; } catch(e) {}
+                        showToast(msg, 'error');
+                    }
+                });
+            }
+
+            // 移除商品
+            function removeItem(cartItemId) {
+                $.ajax({
+                    url: '/api/cart/' + cartItemId,
+                    method: 'DELETE',
+                    dataType: 'json',
+                    success: function () {
+                        showToast('已移除', 'success');
+                        loadCart();
+                    },
+                    error: function () {
+                        showToast('移除失败', 'error');
+                    }
+                });
+            }
+
+            // 减少按钮
+            $('#cartList').on('click', '.qty-minus', function () {
+                var id = $(this).data('id');
+                var qty = parseInt($(this).data('qty'));
+                if (qty < 1) return;
+                updateQty(id, qty);
+            });
+
+            // 增加按钮
+            $('#cartList').on('click', '.qty-plus', function () {
+                var id = $(this).data('id');
+                var qty = parseInt($(this).data('qty'));
+                updateQty(id, qty);
+            });
+
+            // 直接输入数量
+            $('#cartList').on('change', '.qty-input', function () {
+                var id = $(this).data('id');
+                var qty = parseInt($(this).val());
+                var max = parseInt($(this).attr('max'));
+                if (isNaN(qty) || qty < 1) qty = 1;
+                if (qty > max) qty = max;
+                updateQty(id, qty);
+            });
+
+            // 移除按钮
+            $('#cartList').on('click', '.cart-item-remove', function () {
+                var id = $(this).data('id');
+                removeItem(id);
+            });
+
+            // HTML转义
+            function escapeHtml(text) {
+                if (!text) return '';
+                var map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+                return text.replace(/[&<>"']/g, function (m) { return map[m]; });
+            }
+
+            // Toast提示
+            function showToast(msg, type) {
+                var $toast = $('<div class="toast ' + (type || 'success') + '">' + msg + '</div>');
+                $('body').append($toast);
+                setTimeout(function () { $toast.fadeOut(300, function() { $(this).remove(); }); }, 2000);
+            }
+
+            loadCart();
+        });
+    </script>
+</body>
+</html>
