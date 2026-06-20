@@ -1,0 +1,135 @@
+@startuml admin-flow
+
+title 管理员(Admin)操作流程
+
+skinparam ActivityBackgroundColor #FCE4EC
+skinparam ActivityBorderColor #C62828
+skinparam DiamondBackgroundColor #FFF9C4
+skinparam DiamondBorderColor #F9A825
+
+|管理员|
+
+start
+
+:访问系统 /;
+
+if (已有账号?) then (是)
+  :进入登录页;
+  :输入用户名和密码;
+  if (验证通过?) then (是)
+    :登录成功，进入首页;
+    note right
+      首页显示"用户管理"
+      和"库存补货"入口
+      (管理员专属)
+    end note
+  else (否)
+    :显示错误提示;
+    detach
+  endif
+else (否)
+  :进入注册页;
+  :填写用户名、密码、邮箱;
+  :选择角色: **管理员**;
+  :注册成功，跳转登录;
+endif
+
+:=== 首页 ===;
+
+' ======== 个人信息维护 ========
+partition "个人信息维护" {
+  :进入个人信息页;
+  :查看/修改用户名、邮箱、密码;
+  :忘记密码可通过邮箱重置;
+}
+
+' ======== 浏览与购物 ========
+partition "浏览商品 & 购物车" {
+  :浏览商品列表;
+  :分类筛选与排序;
+  :加入购物车;
+  :管理购物车(增减/移除);
+}
+
+' ======== 下单与支付 ========
+partition "下单与支付" {
+  :结算下单;
+  :模拟支付(支付宝/微信/银行卡);
+  :支付成功 -> 扣库存 + 清空购物车;
+}
+
+' ======== 订单管理 ========
+partition "订单管理" {
+  :查看订单历史;
+  :取消待支付订单;
+  :查看订单详情;
+}
+
+' ==========================================
+' 以下为管理员专属功能
+' ==========================================
+
+fork
+  ' ======== 商品管理 ========
+  partition "商品管理 (管理员专属)" {
+    #FFCDD2:进入商品浏览页;
+    :添加商品分类;
+    note right
+      POST /api/products/categories
+    end note
+    :添加商品;
+    note right
+      POST /api/products
+      填写分类/名称/描述/价格/库存
+    end note
+    :商品上架;
+  }
+
+fork again
+  ' ======== 库存补货 ========
+  partition "库存补货 (管理员专属)" {
+    #F8BBD0:进入库存补货页;
+    note right
+      首页有"库存补货"入口
+      仅管理员和商户可见
+    end note
+    :查看库存统计卡片;
+    note right
+      商品总数 | 低库存(<=5) | 已售罄
+    end note
+    :按分类筛选商品;
+    :选择商品，输入补货数量;
+    :使用快捷按钮(+10/+50/+100);
+    :点击"确认补货";
+    :库存累加，页面自动刷新;
+  }
+
+fork again
+  ' ======== 用户管理 ========
+  partition "用户管理 (管理员专属)" {
+    #EF9A9A:进入用户管理页;
+    note right
+      首页有"用户管理"入口
+      仅管理员可见
+    end note
+    :查看所有用户列表;
+    :查看用户信息(ID/用户名/邮箱/角色/注册时间);
+    if (需要删除用户?) then (是)
+      if (是当前登录账号?) then (是)
+        :提示"不能删除当前登录的管理员账号";
+      else (否)
+        if (用户存在?) then (是)
+          :确认删除;
+          :用户删除成功;
+        else (否)
+          :提示"用户不存在";
+        endif
+      endif
+    endif
+  }
+end fork
+
+:退出登录;
+stop
+
+@enduml

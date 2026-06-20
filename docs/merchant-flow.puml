@@ -1,0 +1,110 @@
+@startuml merchant-flow
+
+title 商户(Merchant)操作流程
+
+skinparam ActivityBackgroundColor #E3F2FD
+skinparam ActivityBorderColor #1565C0
+skinparam DiamondBackgroundColor #FFF9C4
+skinparam DiamondBorderColor #F9A825
+
+|商户|
+
+start
+
+:访问系统 /;
+
+if (已有账号?) then (是)
+  :进入登录页;
+  :输入用户名和密码;
+  if (验证通过?) then (是)
+    :登录成功，进入首页;
+    note right
+      首页显示"库存补货"
+      入口(商户专属)
+    end note
+  else (否)
+    :显示错误提示;
+    detach
+  endif
+else (否)
+  :进入注册页;
+  :填写用户名、密码、邮箱;
+  :选择角色: **商户**;
+  :注册成功，跳转登录;
+endif
+
+:=== 首页 ===;
+
+' ======== 个人信息维护 ========
+partition "个人信息维护" {
+  :进入个人信息页;
+  :查看/修改用户名、邮箱、密码;
+}
+
+' ======== 浏览与购物 ========
+partition "浏览商品 & 购物车" {
+  :浏览商品列表;
+  :分类筛选与排序;
+  :加入购物车;
+  :管理购物车(增减/移除);
+}
+
+' ======== 下单与支付 ========
+partition "下单与支付" {
+  :结算下单;
+  :模拟支付(支付宝/微信/银行卡);
+  :支付成功 -> 扣库存 + 清空购物车;
+}
+
+' ======== 订单管理 ========
+partition "订单管理" {
+  :查看订单历史;
+  :取消待支付订单;
+  :查看订单详情;
+}
+
+' ==========================================
+' 以下为商户专属功能
+' ==========================================
+
+fork
+  ' ======== 商品管理 ========
+  partition "商品管理 (商户专属)" {
+    #LightBlue:进入商品浏览页;
+    :添加商品分类;
+    note right
+      通过 API 调用:
+      POST /api/products/categories
+    end note
+    :填写分类名称和描述;
+    :添加商品;
+    note right
+      通过 API 调用:
+      POST /api/products
+    end note
+    :填写商品信息(分类/名称/描述/价格/库存);
+    :商品上架成功;
+  }
+
+fork again
+  ' ======== 库存补货 ========
+  partition "库存补货 (商户专属)" {
+    #E1F5FE:进入库存补货页;
+    note right
+      首页有"库存补货"入口
+      仅商户和管理员可见
+    end note
+    :查看库存统计(总数/低库存/售罄);
+    :按分类筛选商品;
+    :选择商品进行补货;
+    :输入补货数量 或使用快捷按钮(+10/+50/+100);
+    :点击"确认补货";
+    :库存数量累加成功;
+    :页面刷新，统计更新;
+  }
+end fork
+
+:退出登录;
+stop
+
+@enduml

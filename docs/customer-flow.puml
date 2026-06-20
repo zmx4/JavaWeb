@@ -1,0 +1,150 @@
+@startuml customer-flow
+
+title 顾客(Customer)操作流程
+
+skinparam ActivityBackgroundColor #E8F5E9
+skinparam ActivityBorderColor #388E3C
+skinparam DiamondBackgroundColor #FFF9C4
+skinparam DiamondBorderColor #F9A825
+
+|顾客|
+
+start
+
+:访问系统 /;
+
+note right
+  默认重定向到登录页
+end note
+
+if (已有账号?) then (是)
+  :进入登录页;
+  :输入用户名和密码;
+  if (验证通过?) then (是)
+    :登录成功，进入首页;
+  else (否)
+    :显示错误提示;
+    :返回登录页;
+    detach
+  endif
+else (否)
+  :进入注册页;
+  :填写用户名、密码、邮箱;
+  :选择角色(顾客/商户/管理员);
+  if (信息有效?) then (是)
+    :注册成功，跳转登录;
+  else (否)
+    :显示错误(用户名/邮箱已存在);
+    :返回注册页;
+    detach
+  endif
+endif
+
+:=== 首页 ===;
+note right
+  显示用户信息
+  提供功能导航入口
+end note
+
+' ======== 忘记密码 ========
+if (忘记密码?) then (是)
+  :进入忘记密码页;
+  :输入邮箱和新密码;
+  if (邮箱已注册?) then (是)
+    :密码修改成功;
+    :返回登录页;
+    detach
+  else (否)
+    :提示邮箱未注册;
+    detach
+  endif
+endif
+
+' ======== 个人信息维护 ========
+partition "个人信息维护" {
+  :进入个人信息页;
+  :查看基本信息(ID/角色/注册时间);
+  :修改用户名/邮箱/密码(选填);
+  if (信息有效?) then (是)
+    :保存成功;
+  else (否)
+    :显示错误提示;
+  endif
+}
+
+' ======== 浏览商品 ========
+partition "浏览商品" {
+  :进入商品浏览页;
+  :查看商品列表(支持分类筛选);
+  :选择排序方式(价格/时间);
+  :选择排序方向(升序/降序);
+  if (找到心仪商品?) then (是)
+    if (商品有库存?) then (是)
+      :点击"加入购物车";
+      :商品添加到购物车;
+    else (否)
+      :商品已售罄，无法加入;
+    endif
+  endif
+}
+
+' ======== 购物车管理 ========
+partition "购物车管理" {
+  :进入购物车页面;
+  :查看购物车商品列表;
+  :查看总价;
+  if (需要调整?) then (是)
+    if (修改数量) then (true)
+      :修改商品数量;
+      :更新小计和总价;
+    else (false)
+      :移除商品;
+      :更新购物车;
+    endif
+  endif
+  if (确认下单?) then (是)
+    :进入结算页;
+  else (否)
+    :继续浏览;
+    detach
+  endif
+}
+
+' ======== 下单与支付 ========
+partition "下单与支付" {
+  :确认订单商品和总价;
+  :点击"提交订单";
+  :创建订单(状态: PENDING);
+  :选择支付方式;
+  note right
+    支付宝 / 微信 / 银行卡
+    (模拟支付)
+  end note
+  :模拟支付(2.5秒进度条);
+  if (支付成功?) then (是)
+    :扣减商品库存;
+    :清空购物车;
+    :更新订单状态为 PAID;
+    :显示支付成功;
+  else (否)
+    :订单保持 PENDING 状态;
+  endif
+}
+
+' ======== 订单管理 ========
+partition "订单管理" {
+  :进入订单历史页面;
+  :查看订单列表;
+  if (订单为 PENDING?) then (是)
+    if (需要取消?) then (是)
+      :取消订单;
+      :订单状态更新为 CANCELLED;
+    endif
+  endif
+  :查看订单详情(商品/数量/价格);
+}
+
+:退出登录;
+stop
+
+@enduml

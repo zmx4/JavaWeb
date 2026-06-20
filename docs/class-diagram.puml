@@ -1,0 +1,263 @@
+@startuml class-diagram
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+title 商城系统类图
+
+' ========== 枚举 ==========
+enum Role {
+    CUSTOMER
+    MERCHANT
+    ADMIN
+    --
+    + displayName : String
+    + getDisplayName() : String
+}
+
+' ========== 实体层 (Entity) ==========
+class User {
+    - id : Long
+    - username : String
+    - password : String
+    - email : String
+    - role : Role
+    - createTime : LocalDateTime
+    - updateTime : LocalDateTime
+    + isAdmin() : boolean
+    + isMerchant() : boolean
+    + isCustomer() : boolean
+    + getRoleName() : String
+}
+
+class Admin {
+    - userId : Long
+}
+
+class Product {
+    - id : Long
+    - name : String
+    - description : String
+    - price : BigDecimal
+    - stock : Integer
+    - createTime : LocalDateTime
+    - updateTime : LocalDateTime
+}
+
+class ProductCategory {
+    - id : Long
+    - name : String
+    - description : String
+    - createTime : LocalDateTime
+    - updateTime : LocalDateTime
+}
+
+class CartItem {
+    - id : Long
+    - quantity : Integer
+    - createTime : LocalDateTime
+    - updateTime : LocalDateTime
+}
+
+class Order {
+    - id : Long
+    - totalPrice : BigDecimal
+    - status : String
+    - createTime : LocalDateTime
+    - updateTime : LocalDateTime
+}
+
+class OrderItem {
+    - id : Long
+    - quantity : Integer
+    - price : BigDecimal
+}
+
+' ========== 实体关系 ==========
+User "1" --> "1" Role : role
+User "1" --> "0..*" CartItem : 拥有
+User "1" --> "0..*" Order : 下单
+Admin "0..1" --> "1" User : 关联
+Product "0..*" --> "1" ProductCategory : 所属分类
+CartItem "0..*" --> "1" Product : 关联商品
+CartItem "0..*" --> "1" User : 所属用户
+Order "1" --> "1" User : 所属用户
+Order "1" --> "0..*" OrderItem : 包含
+OrderItem "0..*" --> "1" Order : 所属订单
+OrderItem "0..*" --> "1" Product : 关联商品
+
+' ========== 数据访问层 (DAO) ==========
+interface UserRepository <<interface>> {
+    + findByUsername(username) : Optional<User>
+    + findByEmail(email) : Optional<User>
+    + existsByUsername(username) : boolean
+    + existsByEmail(email) : boolean
+    + existsByUsernameAndIdNot(username, id) : boolean
+    + existsByEmailAndIdNot(email, id) : boolean
+}
+
+interface ProductRepository <<interface>> {
+    + findByCategoryId(categoryId) : List<Product>
+    + findByCategoryIdOrderByPriceAsc/Desc(categoryId) : List<Product>
+    + findByCategoryIdOrderByCreateTimeAsc/Desc(categoryId) : List<Product>
+    + findAllByOrderByPriceAsc/Desc() : List<Product>
+    + findAllByOrderByCreateTimeAsc/Desc() : List<Product>
+}
+
+interface ProductCategoryRepository <<interface>>
+interface CartRepository <<interface>> {
+    + findByUserIdOrderByCreateTimeDesc(userId) : List<CartItem>
+    + findByUserIdAndProductId(userId, productId) : Optional<CartItem>
+    + deleteByUserId(userId) : void
+    + countByUserId(userId) : long
+}
+
+interface OrderRepository <<interface>> {
+    + findByUserIdOrderByCreateTimeDesc(userId) : List<Order>
+}
+
+interface AdminRepository <<interface>>
+
+' ========== DAO 继承关系 ==========
+UserRepository -|> JpaRepository
+ProductRepository -|> JpaRepository
+ProductCategoryRepository -|> JpaRepository
+CartRepository -|> JpaRepository
+OrderRepository -|> JpaRepository
+AdminRepository -|> JpaRepository
+
+' ========== 业务层 (Service) ==========
+class UserService {
+    - userRepository : UserRepository
+    + registerUser(username, password, email, role) : User
+    + loginUser(username, password) : User
+    + findByUsername(username) : Optional<User>
+    + existsByUsername(username) : boolean
+    + findAllUsers() : List<User>
+    + findById(userId) : Optional<User>
+    + deleteUserById(userId) : void
+    + updateUser(userId, username, email, password) : User
+    + resetPasswordByEmail(email, newPassword) : void
+}
+
+class ProductService {
+    - productRepository : ProductRepository
+    - categoryRepository : ProductCategoryRepository
+    + findAllCategories() : List<ProductCategory>
+    + findProducts(categoryId, sortBy, sortOrder) : List<Product>
+    + addCategory(name, description) : ProductCategory
+    + addProduct(categoryId, name, desc, price, stock) : Product
+    + restockProduct(productId, quantity) : Product
+}
+
+class CartService {
+    - cartRepository : CartRepository
+    - productRepository : ProductRepository
+    + addToCart(userId, productId, quantity) : CartItem
+    + getCartItems(userId) : List<CartItem>
+    + updateQuantity(userId, cartItemId, quantity) : CartItem
+    + removeFromCart(userId, cartItemId) : void
+    + getCartCount(userId) : long
+}
+
+class OrderService {
+    - orderRepository : OrderRepository
+    - cartRepository : CartRepository
+    - productRepository : ProductRepository
+    + createOrderFromCart(userId) : Order
+    + payOrder(userId, orderId) : Order
+    + cancelOrder(userId, orderId) : void
+    + getUserOrders(userId) : List<Order>
+    + getOrder(orderId) : Optional<Order>
+}
+
+class AdminService {
+    - adminRepository : AdminRepository
+    + isAdmin(userId) : boolean
+    + findAllAdminUserIds() : Set<Long>
+}
+
+' ========== Service 依赖 ==========
+UserService --> UserRepository : 使用
+ProductService --> ProductRepository : 使用
+ProductService --> ProductCategoryRepository : 使用
+CartService --> CartRepository : 使用
+CartService --> ProductRepository : 使用
+OrderService --> OrderRepository : 使用
+OrderService --> CartRepository : 使用
+OrderService --> ProductRepository : 使用
+AdminService --> AdminRepository : 使用
+
+' ========== 控制层 (Controller) ==========
+class AuthController {
+    - userService : UserService
+    + showLoginPage() : String
+    + login(username, password, session, model) : String
+    + showRegisterPage(model) : String
+    + register(username, password, confirmPassword, email, role, model) : String
+    + showForgotPasswordPage() : String
+    + resetPassword(email, newPassword, confirmPassword, model) : String
+    + home(session, model) : String
+    + logout(session) : String
+}
+
+class ProfileController {
+    - userService : UserService
+    + showProfile(session, model) : String
+    + updateProfile(username, email, newPassword, confirmPassword, session, redirect) : String
+}
+
+class ProductController {
+    - productService : ProductService
+    + showProductsPage(session, model) : String
+    + getProducts(categoryId, sortBy, sortOrder) : List<Map>
+    + addCategory(name, description, session) : Map
+    + addProduct(categoryId, name, desc, price, stock, session) : Map
+    + showRestockPage(session, model) : String
+    + restockProduct(productId, quantity, session) : Map
+}
+
+class CartController {
+    - cartService : CartService
+    + showCartPage(session, model) : String
+    + getCart(session) : Map
+    + addToCart(productId, quantity, session) : Map
+    + updateQuantity(cartItemId, quantity, session) : Map
+    + removeFromCart(cartItemId, session) : Map
+}
+
+class OrderController {
+    - orderService : OrderService
+    + showCheckoutPage(session, model) : String
+    + showOrdersPage(session, model) : String
+    + createOrder(session) : Map
+    + payOrder(orderId, session) : Map
+    + cancelOrder(orderId, session) : Map
+    + getOrder(orderId, session) : Map
+    + getUserOrders(session) : List<Map>
+}
+
+class AdminController {
+    - userService : UserService
+    + userManagement(session, model) : String
+    + deleteUser(userId, session, redirect) : String
+}
+
+' ========== Controller 依赖 ==========
+AuthController --> UserService : 使用
+ProfileController --> UserService : 使用
+ProductController --> ProductService : 使用
+CartController --> CartService : 使用
+OrderController --> OrderService : 使用
+AdminController --> UserService : 使用
+
+' ========== 配置类 ==========
+class WebMvcConfig {
+    + addViewControllers(registry) : void
+}
+
+class ShopApplication {
+    + {static} main(args) : void
+}
+
+@enduml
