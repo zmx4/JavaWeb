@@ -1,0 +1,306 @@
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+body {
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.auth-page,
+.home-page {
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	min-height: 100vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 20px;
+}
+
+.dashboard-page {
+	background: #f4f6fb;
+	min-height: 100vh;
+	padding: 24px;
+}
+
+.container {
+	background: white;
+	padding: 40px;
+	border-radius: 10px;
+	box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+	width: 100%;
+}
+
+.auth-page .container {
+	max-width: 400px;
+}
+
+.home-page .container {
+	max-width: 600px;
+	text-align: center;
+}
+
+.dashboard-page .container {
+	max-width: 980px;
+	margin: 0 auto;
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+	padding: 24px;
+}
+
+h1 {
+	color: #333;
+}
+
+.auth-page h1 {
+	text-align: center;
+	margin-bottom: 30px;
+	font-size: 28px;
+}
+
+.home-page h1 {
+	margin-bottom: 20px;
+	font-size: 32px;
+}
+
+.dashboard-page h1 {
+	margin-bottom: 18px;
+}
+
+.message {
+	padding: 12px;
+	border-radius: 6px;
+	margin-bottom: 20px;
+	font-size: 14px;
+}
+
+.error-message {
+	background: #fee;
+	color: #c33;
+	border: 1px solid #fcc;
+}
+
+.success-message {
+	background: #efe;
+	color: #3c3;
+	border: 1px solid #cfc;
+}
+
+.form-group {
+	margin-bottom: 20px;
+}
+
+label {
+	display: block;
+	margin-bottom: 8px;
+	color: #555;
+	font-weight: 500;
+}
+
+input {
+	width: 100%;
+	padding: 12px;
+	border: 2px solid #ddd;
+	border-radius: 5px;
+	font-size: 14px;
+	transition: border-color 0.3s;
+}
+
+input:focus {
+	outline: none;
+	border-color: #667eea;
+}
+
+.primary-btn {
+	padding: 12px 30px;
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	color: white;
+	border: none;
+	border-radius: 5px;
+	font-size: 16px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: transform 0.2s;
+}
+
+.primary-btn:hover {
+	transform: translateY(-2px);
+}
+
+.primary-btn:active {
+	transform: translateY(0);
+}
+
+.primary-btn.block {
+	width: 100%;
+}
+
+.link-btn {
+	text-decoration: none;
+}
+
+.page-links,
+.actions {
+	display: flex;
+	gap: 12px;
+	justify-content: center;
+	flex-wrap: wrap;
+}
+
+.page-links a,
+.actions a {
+	text-decoration: none;
+}
+
+.text-link {
+	color: #667eea;
+	text-decoration: none;
+	font-weight: 600;
+}
+
+.text-link:hover {
+	text-decoration: underline;
+}
+
+.register-link,
+.login-link {
+	text-align: center;
+	margin-top: 20px;
+	color: #666;
+}
+
+.register-link a,
+.login-link a {
+	color: #667eea;
+	text-decoration: none;
+	font-weight: 600;
+}
+
+.register-link a:hover,
+.login-link a:hover {
+	text-decoration: underline;
+}
+
+.hint {
+	font-size: 12px;
+	color: #999;
+	margin-top: 5px;
+}
+
+.user-info {
+	background: #f8f9fa;
+	padding: 20px;
+	border-radius: 8px;
+	margin-bottom: 30px;
+	text-align: left;
+}
+
+.user-info-item {
+	padding: 10px 0;
+	border-bottom: 1px solid #dee2e6;
+}
+
+.user-info-item:last-child {
+	border-bottom: none;
+}
+
+.label {
+	font-weight: 600;
+	color: #555;
+	display: inline-block;
+	width: 100px;
+}
+
+.value {
+	color: #333;
+}
+
+.welcome {
+	color: #666;
+	font-size: 18px;
+	margin-bottom: 30px;
+}
+
+.table-card {
+	background: white;
+	border-radius: 10px;
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+	padding: 24px;
+}
+
+table {
+	width: 100%;
+	border-collapse: collapse;
+	margin-top: 12px;
+	font-size: 14px;
+}
+
+th, td {
+	padding: 12px;
+	border-bottom: 1px solid #ececec;
+	text-align: left;
+	vertical-align: middle;
+}
+
+th {
+	background: #f8f9fb;
+	color: #444;
+}
+
+.badge {
+	display: inline-block;
+	padding: 3px 8px;
+	border-radius: 999px;
+	font-size: 12px;
+	background: #e8edff;
+	color: #3d52b3;
+}
+
+.btn {
+	border: none;
+	border-radius: 5px;
+	padding: 8px 12px;
+	cursor: pointer;
+	font-size: 13px;
+}
+
+.btn-danger {
+	background: #d84b4b;
+	color: white;
+}
+
+.btn-danger:disabled {
+	background: #d5d5d5;
+	cursor: not-allowed;
+}
+
+.toolbar {
+	margin-top: 20px;
+}
+
+.actions {
+	display: flex;
+	gap: 12px;
+	justify-content: center;
+	flex-wrap: wrap;
+}
+
+.actions a {
+	text-decoration: none;
+}
+
+.actions .primary-btn {
+	display: inline-block;
+}
+
+.home-page .container {
+	text-align: center;
+}
+
+.home-page .welcome {
+	color: #666;
+	font-size: 18px;
+	margin-bottom: 30px;
+}
+
+
