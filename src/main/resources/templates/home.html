@@ -41,6 +41,9 @@
             <a th:href="@{/cart}">
                 <button type="button" class="primary-btn">购物车</button>
             </a>
+            <a th:href="@{/orders}">
+                <button type="button" class="primary-btn">我的订单</button>
+            </a>
             <a th:if="${userIsAdmin}" th:href="@{/admin/users}">
                 <button type="button" class="primary-btn">用户管理</button>
             </a>

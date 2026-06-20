@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>确认订单</title>
+    <link rel="stylesheet" th:href="@{/css/checkout.css}">
+</head>
+<body>
+    <div class="navbar">
+        <h1>确认订单</h1>
+        <div class="navbar-links">
+            <a th:href="@{/home}">首页</a>
+            <a th:href="@{/products}">浏览商品</a>
+            <a th:href="@{/cart}">购物车</a>
+        </div>
+    </div>
+
+    <div class="checkout-container">
+        <!-- 步骤指示器 -->
+        <div class="steps">
+            <div class="step active" id="step1">
+                <span class="step-num">1</span> 确认订单
+            </div>
+            <span class="step-arrow">→</span>
+            <div class="step" id="step2">
+                <span class="step-num">2</span> 支付
+            </div>
+            <span class="step-arrow">→</span>
+            <div class="step" id="step3">
+                <span class="step-num">3</span> 完成
+            </div>
+        </div>
+
+        <!-- 加载中 -->
+        <div class="page-loading" id="pageLoading">
+            <div class="spinner"></div>
+            <p>加载购物车...</p>
+        </div>
+
+        <!-- 确认订单区域 -->
+        <div id="confirmSection" style="display:none;">
+            <div class="card">
+                <div class="card-header">订单商品</div>
+                <div id="orderItems"></div>
+                <div class="total-row">
+                    <span class="total-label">合计</span>
+                    <span class="total-amount" id="orderTotal">0.00</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">选择支付方式</div>
+                <div class="pay-methods">
+                    <div class="pay-method selected" data-method="alipay">
+                        <span class="pay-method-icon">💳</span>
+                        <div>
+                            <div class="pay-method-name">支付宝（模拟）</div>
+                            <div class="pay-method-desc">推荐使用支付宝支付</div>
+                        </div>
+                    </div>
+                    <div class="pay-method" data-method="wechat">
+                        <span class="pay-method-icon">📱</span>
+                        <div>
+                            <div class="pay-method-name">微信支付（模拟）</div>
+                            <div class="pay-method-desc">使用微信支付</div>
+                        </div>
+                    </div>
+                    <div class="pay-method" data-method="card">
+                        <span class="pay-method-icon">🏦</span>
+                        <div>
+                            <div class="pay-method-name">银行卡支付（模拟）</div>
+                            <div class="pay-method-desc">使用储蓄卡/信用卡</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="btn-row">
+                <a class="btn btn-secondary" th:href="@{/cart}">返回购物车</a>
+                <button class="btn btn-primary" id="submitOrderBtn">提交订单</button>
+            </div>
+        </div>
+
+        <!-- 支付成功区域 -->
+        <div id="successSection" style="display:none;">
+            <div class="card" style="padding:48px 30px;text-align:center;">
+                <div class="success-icon">🎉</div>
+                <div class="success-title">支付成功！</div>
+                <div class="success-msg" id="successMsg">订单号：--</div>
+                <div class="success-links">
+                    <a class="link-secondary" th:href="@{/orders}">查看订单</a>
+                    <a class="link-primary" th:href="@{/products}">继续购物</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/js/jquery-4.0.0.min.js}"></script>
+    <script>
+        $(function () {
+            var currentOrderId = null;
+            var currentTotal = '0.00';
+            var selectedMethod = 'alipay';
+
+            // 加载购物车用于确认
+            function loadCartForCheckout() {
+                $.ajax({
+                    url: '/api/cart',
+                    method: 'GET',
+                    dataType: 'json',
+                    success: function (data) {
+                        $('#pageLoading').hide();
+                        if (!data.items || data.items.length === 0) {
+                            showToast('购物车为空，请先添加商品', 'error');
+                            setTimeout(function() { window.location.href = '/products'; }, 1500);
+                            return;
+                        }
+                        renderOrderPreview(data);
+                        $('#confirmSection').show();
+                    },
+                    error: function () {
+                        $('#pageLoading').hide();
+                        showToast('加载失败', 'error');
+                    }
+                });
+            }
+
+            // 渲染订单预览
+            function renderOrderPreview(data) {
+                var $items = $('#orderItems');
+                $items.empty();
+                $.each(data.items, function (i, item) {
+                    var html = ''
+                        + '<div class="order-item">'
+                        + '  <div>'
+                        + '    <div class="item-name">' + escapeHtml(item.productName) + '</div>'
+                        + '    <div class="item-detail">¥' + item.productPrice + ' × ' + item.quantity + '</div>'
+                        + '  </div>'
+                        + '  <div class="item-subtotal">¥' + item.subtotal + '</div>'
+                        + '</div>';
+                    $items.append(html);
+                });
+                $('#orderTotal').text(data.total);
+                currentTotal = data.total;
+            }
+
+            // 支付方式选择
+            $('.pay-method').on('click', function () {
+                $('.pay-method').removeClass('selected');
+                $(this).addClass('selected');
+                selectedMethod = $(this).data('method');
+            });
+
+            // 提交订单
+            $('#submitOrderBtn').on('click', function () {
+                var $btn = $(this);
+                $btn.prop('disabled', true).text('创建订单中...');
+
+                $.ajax({
+                    url: '/api/orders',
+                    method: 'POST',
+                    dataType: 'json',
+                    success: function (res) {
+                        currentOrderId = res.orderId;
+                        currentTotal = res.total;
+                        startPayment(res.orderId, res.total);
+                    },
+                    error: function (xhr) {
+                        var msg = '创建订单失败';
+                        try { msg = JSON.parse(xhr.responseText).message || msg; } catch(e) {}
+                        $btn.prop('disabled', false).text('提交订单');
+                        showToast(msg, 'error');
+                    }
+                });
+            });
+
+            // 模拟支付流程
+            function startPayment(orderId, total) {
+                // 更新步骤
+                $('#step1').removeClass('active').addClass('done');
+                $('#step2').addClass('active');
+
+                var methodNames = { alipay: '支付宝', wechat: '微信支付', card: '银行卡' };
+                var methodName = methodNames[selectedMethod] || '支付宝';
+
+                // 显示支付弹窗
+                var modal = ''
+                    + '<div class="pay-modal-overlay" id="payModal">'
+                    + '  <div class="pay-modal">'
+                    + '    <div class="pay-modal-icon">💳</div>'
+                    + '    <div class="pay-modal-title">' + methodName + ' 支付中</div>'
+                    + '    <div class="pay-modal-amount">' + total + '</div>'
+                    + '    <div class="pay-progress"><div class="pay-progress-bar"></div></div>'
+                    + '    <div class="pay-modal-status" id="payStatus">正在连接支付网关...</div>'
+                    + '  </div>'
+                    + '</div>';
+                $('body').append(modal);
+
+                // 模拟支付进度
+                setTimeout(function() { $('#payStatus').text('验证支付信息...'); }, 800);
+                setTimeout(function() { $('#payStatus').text('处理交易中...'); }, 1600);
+
+                // 2.5秒后调用支付接口
+                setTimeout(function() {
+                    $.ajax({
+                        url: '/api/orders/' + orderId + '/pay',
+                        method: 'POST',
+                        dataType: 'json',
+                        success: function (res) {
+                            $('#payStatus').text('支付成功！');
+                            setTimeout(function() {
+                                $('#payModal').fadeOut(300, function() { $(this).remove(); });
+                                showSuccess(orderId);
+                            }, 600);
+                        },
+                        error: function (xhr) {
+                            var msg = '支付失败';
+                            try { msg = JSON.parse(xhr.responseText).message || msg; } catch(e) {}
+                            $('#payModal').fadeOut(300, function() { $(this).remove(); });
+                            showToast(msg, 'error');
+                            $('#submitOrderBtn').prop('disabled', false).text('提交订单');
+                            $('#step2').removeClass('active');
+                            $('#step1').removeClass('done').addClass('active');
+                        }
+                    });
+                }, 2500);
+            }
+
+            // 显示支付成功
+            function showSuccess(orderId) {
+                $('#step2').removeClass('active').addClass('done');
+                $('#step3').addClass('active');
+                $('#confirmSection').hide();
+                $('#successMsg').text('订单号：' + orderId);
+                $('#successSection').fadeIn();
+            }
+
+            // HTML转义
+            function escapeHtml(text) {
+                if (!text) return '';
+                var map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+                return text.replace(/[&<>"']/g, function (m) { return map[m]; });
+            }
+
+            // Toast
+            function showToast(msg, type) {
+                var $t = $('<div class="toast ' + (type || 'success') + '">' + msg + '</div>');
+                $('body').append($t);
+                setTimeout(function() { $t.fadeOut(300, function() { $(this).remove(); }); }, 2000);
+            }
+
+            loadCartForCheckout();
+        });
+    </script>
+</body>
+</html>
