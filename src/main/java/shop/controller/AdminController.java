@@ -9,21 +9,18 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import shop.entity.User;
-import shop.service.AdminService;
 import shop.service.UserService;
 
-import java.util.Set;
+import java.util.List;
 
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
 
     private final UserService userService;
-    private final AdminService adminService;
 
-    public AdminController(UserService userService, AdminService adminService) {
+    public AdminController(UserService userService) {
         this.userService = userService;
-        this.adminService = adminService;
     }
 
     @GetMapping("/users")
@@ -32,13 +29,12 @@ public class AdminController {
         if (currentUser == null) {
             return "redirect:/login";
         }
-        if (!adminService.isAdmin(currentUser.getId())) {
+        if (!currentUser.isAdmin()) {
             return "redirect:/home?error=forbidden";
         }
 
-        Set<Long> adminUserIds = adminService.findAllAdminUserIds();
-        model.addAttribute("users", userService.findAllUsers());
-        model.addAttribute("adminUserIds", adminUserIds);
+        List<User> allUsers = userService.findAllUsers();
+        model.addAttribute("users", allUsers);
         model.addAttribute("currentUserId", currentUser.getId());
         return "admin/users";
     }
@@ -51,7 +47,7 @@ public class AdminController {
         if (currentUser == null) {
             return "redirect:/login";
         }
-        if (!adminService.isAdmin(currentUser.getId())) {
+        if (!currentUser.isAdmin()) {
             return "redirect:/home?error=forbidden";
         }
         if (currentUser.getId().equals(userId)) {

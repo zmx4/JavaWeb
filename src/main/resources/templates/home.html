@@ -25,6 +25,10 @@
                 <span class="value" th:text="${user.username}"></span>
             </div>
             <div class="user-info-item">
+                <span class="label">角色：</span>
+                <span class="value badge" th:text="${user.roleName}"></span>
+            </div>
+            <div class="user-info-item">
                 <span class="label">邮箱：</span>
                 <span class="value" th:text="${user.email != null ? user.email : '未设置'}"></span>
             </div>
@@ -44,7 +48,7 @@
             <a th:href="@{/orders}">
                 <button type="button" class="primary-btn">我的订单</button>
             </a>
-            <a th:if="${userIsAdmin}" th:href="@{/admin/users}">
+            <a th:if="${user.admin}" th:href="@{/admin/users}">
                 <button type="button" class="primary-btn">用户管理</button>
             </a>
             <a th:href="@{/logout}">

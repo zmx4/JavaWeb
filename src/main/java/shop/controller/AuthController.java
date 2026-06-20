@@ -1,7 +1,7 @@
 package shop.controller;
 
+import shop.entity.Role;
 import shop.entity.User;
-import shop.service.AdminService;
 import shop.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
@@ -15,11 +15,8 @@ public class AuthController {
 
     private final UserService userService;
 
-    private final AdminService adminService;
-
-    public AuthController(UserService userService, AdminService adminService) {
+    public AuthController(UserService userService) {
         this.userService = userService;
-        this.adminService = adminService;
     }
 
     /**
@@ -52,7 +49,8 @@ public class AuthController {
      * 显示注册页面
      */
     @GetMapping("/register")
-    public String showRegisterPage() {
+    public String showRegisterPage(Model model) {
+        model.addAttribute("roles", Role.values());
         return "register";
     }
 
@@ -64,18 +62,26 @@ public class AuthController {
                           @RequestParam String password,
                           @RequestParam String confirmPassword,
                           @RequestParam(required = false) String email,
+                          @RequestParam(defaultValue = "CUSTOMER") String role,
                           Model model) {
         // 验证密码是否一致
         if (!password.equals(confirmPassword)) {
             model.addAttribute("error", "两次输入的密码不一致");
+            model.addAttribute("roles", Role.values());
             return "register";
         }
 
         try {
-            userService.registerUser(username, password, email);
+            Role userRole = Role.valueOf(role);
+            userService.registerUser(username, password, email, userRole);
             return "redirect:/login?registered";
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("error", "无效的角色选择");
+            model.addAttribute("roles", Role.values());
+            return "register";
         } catch (RuntimeException e) {
             model.addAttribute("error", e.getMessage());
+            model.addAttribute("roles", Role.values());
             return "register";
         }
     }
@@ -90,7 +96,6 @@ public class AuthController {
             return "redirect:/login";
         }
         model.addAttribute("user", currentUser);
-        model.addAttribute("userIsAdmin", adminService.isAdmin(currentUser.getId()));
         return "home";
     }
 

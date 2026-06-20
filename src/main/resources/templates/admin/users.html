@@ -30,8 +30,7 @@
             <td th:text="${u.username}"></td>
             <td th:text="${u.email != null ? u.email : '-'}"></td>
             <td>
-                <span th:if="${adminUserIds.contains(u.id)}" class="badge">管理员</span>
-                <span th:if="${!adminUserIds.contains(u.id)}">普通用户</span>
+                <span th:text="${u.roleName}" class="badge"></span>
             </td>
             <td th:text="${u.createTime}"></td>
             <td>

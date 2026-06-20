@@ -35,6 +35,10 @@ public class User {
     @Column(unique = true)
     private String email;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role = Role.CUSTOMER;
+
     @Column(name = "create_time")
     private LocalDateTime createTime;
 
@@ -50,5 +54,21 @@ public class User {
     @PreUpdate
     protected void onUpdate() {
         updateTime = LocalDateTime.now();
+    }
+
+    public boolean isAdmin() {
+        return role == Role.ADMIN;
+    }
+
+    public boolean isMerchant() {
+        return role == Role.MERCHANT;
+    }
+
+    public boolean isCustomer() {
+        return role == Role.CUSTOMER;
+    }
+
+    public String getRoleName() {
+        return role != null ? role.getDisplayName() : "";
     }
 }

@@ -13,6 +13,7 @@ CREATE TABLE users (
     username VARCHAR(20) NOT NULL UNIQUE,
     password VARCHAR(100) NOT NULL,
     email VARCHAR(255) UNIQUE,
+    role VARCHAR(20) NOT NULL DEFAULT 'CUSTOMER',
     create_time DATETIME,
     update_time DATETIME,
     INDEX idx_username (username),

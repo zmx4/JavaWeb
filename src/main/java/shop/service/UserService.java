@@ -1,6 +1,7 @@
 package shop.service;
 
 import shop.dao.UserRepository;
+import shop.entity.Role;
 import shop.entity.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +21,7 @@ public class UserService {
      * 用户注册
      */
     @Transactional
-    public User registerUser(String username, String password, String email) {
+    public User registerUser(String username, String password, String email, Role role) {
         // 检查用户名是否已存在
         if (userRepository.existsByUsername(username)) {
             throw new RuntimeException("用户名已存在");
@@ -36,6 +37,7 @@ public class UserService {
         user.setUsername(username);
         user.setPassword(password); // TODO: 使用BCrypt加密密码
         user.setEmail(email);
+        user.setRole(role != null ? role : Role.CUSTOMER);
 
         return userRepository.save(user);
     }
