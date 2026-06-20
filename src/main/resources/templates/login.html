@@ -14,6 +14,10 @@
             注册成功！请登录。
         </div>
 
+        <div th:if="${param.reset}" class="success-message">
+            密码修改成功！请使用新密码登录。
+        </div>
+
         <div th:if="${error}" class="error-message" th:text="${error}"></div>
 
         <form th:action="@{/login}" method="post">
@@ -34,6 +38,10 @@
 
         <div class="register-link">
             还没有账号？<a th:href="@{/register}">立即注册</a>
+        </div>
+
+        <div class="register-link">
+            忘记密码？<a th:href="@{/forgot-password}">通过邮箱修改</a>
         </div>
     </div>
 </body>

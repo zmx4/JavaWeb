@@ -137,4 +137,25 @@ public class UserService {
 
         return userRepository.save(user);
     }
+
+    /**
+     * 通过邮箱重置密码
+     * @param email 用户邮箱
+     * @param newPassword 新密码
+     */
+    @Transactional
+    public void resetPasswordByEmail(String email, String newPassword) {
+        if (email == null || email.isEmpty()) {
+            throw new RuntimeException("邮箱不能为空");
+        }
+        if (newPassword == null || newPassword.length() < 6) {
+            throw new RuntimeException("新密码长度不能少于6个字符");
+        }
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("该邮箱未注册任何账号"));
+
+        user.setPassword(newPassword);
+        userRepository.save(user);
+    }
 }

@@ -87,6 +87,36 @@ public class AuthController {
     }
 
     /**
+     * 显示忘记密码页面
+     */
+    @GetMapping("/forgot-password")
+    public String showForgotPasswordPage() {
+        return "forgot-password";
+    }
+
+    /**
+     * 处理通过邮箱重置密码
+     */
+    @PostMapping("/forgot-password")
+    public String resetPassword(@RequestParam String email,
+                               @RequestParam String newPassword,
+                               @RequestParam String confirmPassword,
+                               Model model) {
+        if (!newPassword.equals(confirmPassword)) {
+            model.addAttribute("error", "两次输入的密码不一致");
+            return "forgot-password";
+        }
+
+        try {
+            userService.resetPasswordByEmail(email, newPassword);
+            return "redirect:/login?reset";
+        } catch (RuntimeException e) {
+            model.addAttribute("error", e.getMessage());
+            return "forgot-password";
+        }
+    }
+
+    /**
      * 首页（需要登录）
      */
     @GetMapping("/home")
