@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人信息维护</title>
+    <link rel="stylesheet" th:href="@{/css/profile.css}">
+</head>
+<body class="auth-page">
+    <div class="container">
+        <h1>个人信息维护</h1>
+
+        <div th:if="${success}" class="message success-message" th:text="${success}"></div>
+        <div th:if="${error}" class="message error-message" th:text="${error}"></div>
+
+        <div class="profile-info">
+            <div class="profile-info-item">
+                <span class="label">用户ID：</span>
+                <span class="value" th:text="${user.id}"></span>
+            </div>
+            <div class="profile-info-item">
+                <span class="label">角色：</span>
+                <span class="value badge" th:text="${user.roleName}"></span>
+            </div>
+            <div class="profile-info-item">
+                <span class="label">注册时间：</span>
+                <span class="value" th:text="${#temporals.format(user.createTime, 'yyyy-MM-dd HH:mm:ss')}"></span>
+            </div>
+        </div>
+
+        <form th:action="@{/profile}" method="post">
+            <div class="form-group">
+                <label for="username">用户名</label>
+                <input type="text" id="username" name="username" required
+                       th:value="${user.username}"
+                       placeholder="请输入用户名" minlength="3" maxlength="20">
+                <div class="hint">用户名长度：3-20个字符</div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">邮箱</label>
+                <input type="email" id="email" name="email"
+                       th:value="${user.email}"
+                       placeholder="请输入邮箱地址（选填）">
+            </div>
+
+            <div class="section-title">修改密码（选填）</div>
+            <div class="hint section-hint">如不需要修改密码，请留空</div>
+
+            <div class="form-group">
+                <label for="newPassword">新密码</label>
+                <input type="password" id="newPassword" name="newPassword"
+                       placeholder="请输入新密码" minlength="6">
+                <div class="hint">密码长度至少6个字符</div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword">确认新密码</label>
+                <input type="password" id="confirmPassword" name="confirmPassword"
+                       placeholder="请再次输入新密码" minlength="6">
+            </div>
+
+            <button type="submit" class="primary-btn block">保存修改</button>
+        </form>
+
+        <div class="back-link">
+            <a th:href="@{/home}">返回首页</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -95,4 +95,21 @@ public class ProductService {
         product.setStock(stock);
         return productRepository.save(product);
     }
+
+    /**
+     * 补货 - 增加商品库存
+     * @param productId 商品ID
+     * @param quantity 补货数量（必须大于0）
+     * @return 补货后的商品对象
+     */
+    @Transactional
+    public Product restockProduct(Long productId, Integer quantity) {
+        if (quantity == null || quantity <= 0) {
+            throw new RuntimeException("补货数量必须大于0");
+        }
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("商品不存在"));
+        product.setStock(product.getStock() + quantity);
+        return productRepository.save(product);
+    }
 }

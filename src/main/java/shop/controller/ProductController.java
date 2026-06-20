@@ -86,6 +86,42 @@ public class ProductController {
         return productToMap(product);
     }
 
+    /**
+     * 补货页面（商户/管理员可见）
+     */
+    @GetMapping("/restock")
+    public String showRestockPage(HttpSession session, Model model) {
+        User currentUser = (User) session.getAttribute("currentUser");
+        if (currentUser == null) {
+            return "redirect:/login";
+        }
+        if (!currentUser.isAdmin() && !currentUser.isMerchant()) {
+            return "redirect:/home?error=forbidden";
+        }
+        List<ProductCategory> categories = productService.findAllCategories();
+        model.addAttribute("categories", categories);
+        return "restock";
+    }
+
+    /**
+     * API：补货（增加库存）
+     */
+    @PostMapping("/api/products/{productId}/restock")
+    @ResponseBody
+    public Map<String, Object> restockProduct(@PathVariable Long productId,
+                                              @RequestParam Integer quantity,
+                                              HttpSession session) {
+        User currentUser = (User) session.getAttribute("currentUser");
+        if (currentUser == null) {
+            throw new RuntimeException("请先登录");
+        }
+        if (!currentUser.isAdmin() && !currentUser.isMerchant()) {
+            throw new RuntimeException("无权限执行此操作");
+        }
+        Product product = productService.restockProduct(productId, quantity);
+        return productToMap(product);
+    }
+
     private Map<String, Object> productToMap(Product product) {
         Map<String, Object> map = new HashMap<>();
         map.put("id", product.getId());

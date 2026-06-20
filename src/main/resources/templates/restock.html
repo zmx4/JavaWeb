@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>库存补货</title>
+    <link rel="stylesheet" th:href="@{/css/restock.css}">
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <div class="navbar">
+        <h1>库存补货管理</h1>
+        <div class="navbar-links">
+            <a th:href="@{/home}">首页</a>
+            <a th:href="@{/products}">商品浏览</a>
+            <a th:href="@{/logout}">退出登录</a>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <!-- 分类标签栏 -->
+        <div class="category-tabs" id="categoryTabs">
+            <div class="category-tab active" data-category="">全部分类</div>
+            <div class="category-tab" th:each="cat : ${categories}"
+                 th:data-category="${cat.id}"
+                 th:text="${cat.name}">分类</div>
+        </div>
+
+        <!-- 筛选排序栏 -->
+        <div class="filter-bar">
+            <div class="filter-group">
+                <label>排序方式：</label>
+                <select id="sortBy">
+                    <option value="createTime">按时间</option>
+                    <option value="price">按价格</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>排序方向：</label>
+                <select id="sortOrder">
+                    <option value="desc">降序</option>
+                    <option value="asc">升序</option>
+                </select>
+            </div>
+            <span class="result-count" id="resultCount"></span>
+        </div>
+
+        <!-- 统计卡片 -->
+        <div class="stats-bar" id="statsBar">
+            <div class="stat-card">
+                <div class="stat-value" id="statTotal">0</div>
+                <div class="stat-label">商品总数</div>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-value" id="statLow">0</div>
+                <div class="stat-label">低库存（≤5件）</div>
+            </div>
+            <div class="stat-card danger">
+                <div class="stat-value" id="statOut">0</div>
+                <div class="stat-label">已售罄</div>
+            </div>
+        </div>
+
+        <!-- 商品补货表格 -->
+        <div class="table-card">
+            <div class="loading" id="loadingIndicator" style="display:none;">
+                <div class="spinner"></div>
+                <p>加载中...</p>
+            </div>
+            <div id="tableArea" style="display:none;">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>商品名称</th>
+                        <th>分类</th>
+                        <th>价格</th>
+                        <th>当前库存</th>
+                        <th>补货数量</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="productTableBody"></tbody>
+                </table>
+            </div>
+            <div class="empty-state" id="emptyState" style="display:none;">
+                <div class="icon">📦</div>
+                <p>暂无商品</p>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/js/jquery-4.0.0.min.js}"></script>
+    <script>
+        $(function () {
+            var currentCategory = '';
+            var currentSortBy = 'createTime';
+            var currentSortOrder = 'desc';
+
+            function loadProducts() {
+                $('#tableArea').hide();
+                $('#emptyState').hide();
+                $('#loadingIndicator').show();
+
+                var params = {
+                    sortBy: currentSortBy,
+                    sortOrder: currentSortOrder
+                };
+                if (currentCategory) {
+                    params.categoryId = currentCategory;
+                }
+
+                $.ajax({
+                    url: '/api/products',
+                    method: 'GET',
+                    data: params,
+                    dataType: 'json',
+                    success: function (data) {
+                        $('#loadingIndicator').hide();
+                        renderTable(data);
+                    },
+                    error: function () {
+                        $('#loadingIndicator').hide();
+                        $('#emptyState').show().find('p').text('加载失败，请刷新重试');
+                    }
+                });
+            }
+
+            function renderTable(products) {
+                var $tbody = $('#productTableBody');
+                $tbody.empty();
+
+                // 统计
+                var total = products.length;
+                var low = 0;
+                var out = 0;
+                $.each(products, function (i, p) {
+                    if (p.stock === 0) out++;
+                    else if (p.stock <= 5) low++;
+                });
+                $('#statTotal').text(total);
+                $('#statLow').text(low);
+                $('#statOut').text(out);
+                $('#resultCount').text('共 ' + total + ' 件商品');
+
+                if (products.length === 0) {
+                    $('#emptyState').show();
+                    return;
+                }
+
+                $.each(products, function (i, product) {
+                    var badgeClass = 'normal';
+                    var stockText = product.stock;
+                    if (product.stock === 0) {
+                        badgeClass = 'out';
+                        stockText = '售罄';
+                    } else if (product.stock <= 5) {
+                        badgeClass = 'low';
+                    }
+
+                    var html = ''
+                        + '<tr id="row-' + product.id + '">'
+                        + '  <td>' + product.id + '</td>'
+                        + '  <td><strong>' + escapeHtml(product.name) + '</strong></td>'
+                        + '  <td>' + escapeHtml(product.categoryName) + '</td>'
+                        + '  <td>¥' + product.price + '</td>'
+                        + '  <td><span class="stock-badge ' + badgeClass + '">' + stockText + '</span></td>'
+                        + '  <td>'
+                        + '    <div class="restock-form">'
+                        + '      <input type="number" class="restock-input" id="qty-' + product.id + '" min="1" value="10" placeholder="数量">'
+                        + '      <div class="quick-btns">'
+                        + '        <button class="quick-btn" data-pid="' + product.id + '" data-qty="10">+10</button>'
+                        + '        <button class="quick-btn" data-pid="' + product.id + '" data-qty="50">+50</button>'
+                        + '        <button class="quick-btn" data-pid="' + product.id + '" data-qty="100">+100</button>'
+                        + '      </div>'
+                        + '    </div>'
+                        + '  </td>'
+                        + '  <td>'
+                        + '    <button class="restock-btn" data-product-id="' + product.id + '">确认补货</button>'
+                        + '  </td>'
+                        + '</tr>';
+
+                    $tbody.append(html);
+                });
+
+                $('#tableArea').show();
+            }
+
+            function escapeHtml(text) {
+                if (!text) return '';
+                var map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+                return text.replace(/[&<>"']/g, function (m) { return map[m]; });
+            }
+
+            // 快速补货按钮
+            $(document).on('click', '.quick-btn', function () {
+                var pid = $(this).data('pid');
+                var qty = $(this).data('qty');
+                var $input = $('#qty-' + pid);
+                var current = parseInt($input.val()) || 0;
+                $input.val(current + qty);
+            });
+
+            // 确认补货
+            $(document).on('click', '.restock-btn', function () {
+                var $btn = $(this);
+                var productId = $btn.data('product-id');
+                var quantity = parseInt($('#qty-' + productId).val());
+
+                if (!quantity || quantity <= 0) {
+                    showToast('请输入有效的补货数量', 'error');
+                    return;
+                }
+
+                $btn.prop('disabled', true).text('补货中...');
+
+                $.ajax({
+                    url: '/api/products/' + productId + '/restock',
+                    method: 'POST',
+                    data: { quantity: quantity },
+                    dataType: 'json',
+                    success: function (data) {
+                        showToast('补货成功！当前库存: ' + data.stock, 'success');
+                        // 重新加载列表以更新统计和状态
+                        loadProducts();
+                    },
+                    error: function (xhr) {
+                        var msg = '补货失败';
+                        try {
+                            msg = JSON.parse(xhr.responseText).message || msg;
+                        } catch(e) {}
+                        $btn.prop('disabled', false).text('确认补货');
+                        showToast(msg, 'error');
+                    }
+                });
+            });
+
+            // 分类标签点击
+            $('#categoryTabs').on('click', '.category-tab', function () {
+                $('.category-tab').removeClass('active');
+                $(this).addClass('active');
+                currentCategory = $(this).data('category');
+                loadProducts();
+            });
+
+            // 排序变更
+            $('#sortBy').on('change', function () {
+                currentSortBy = $(this).val();
+                loadProducts();
+            });
+            $('#sortOrder').on('change', function () {
+                currentSortOrder = $(this).val();
+                loadProducts();
+            });
+
+            // Toast提示
+            function showToast(msg, type) {
+                var $toast = $('<div class="toast ' + (type || 'success') + '">' + msg + '</div>');
+                $('body').append($toast);
+                setTimeout(function () { $toast.fadeOut(300, function() { $(this).remove(); }); }, 2500);
+            }
+
+            // 初始加载
+            loadProducts();
+        });
+    </script>
+</body>
+</html>

@@ -39,6 +39,9 @@
         </div>
 
         <div class="actions">
+            <a th:href="@{/profile}">
+                <button type="button" class="primary-btn">个人信息</button>
+            </a>
             <a th:href="@{/products}">
                 <button type="button" class="primary-btn">浏览商品</button>
             </a>
@@ -50,6 +53,9 @@
             </a>
             <a th:if="${user.admin}" th:href="@{/admin/users}">
                 <button type="button" class="primary-btn">用户管理</button>
+            </a>
+            <a th:if="${user.admin || user.merchant}" th:href="@{/restock}">
+                <button type="button" class="primary-btn">库存补货</button>
             </a>
             <a th:href="@{/logout}">
                 <button type="button" class="primary-btn">退出登录</button>

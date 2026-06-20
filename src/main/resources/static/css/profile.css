@@ -1,0 +1,64 @@
+@import url('style.css');
+
+.auth-page .container {
+    max-width: 480px;
+}
+
+.profile-info {
+    background: #f8f9fa;
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+}
+
+.profile-info-item {
+    padding: 8px 0;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    align-items: center;
+}
+
+.profile-info-item:last-child {
+    border-bottom: none;
+}
+
+.profile-info-item .label {
+    font-weight: 600;
+    color: #555;
+    display: inline-block;
+    width: 80px;
+    flex-shrink: 0;
+}
+
+.profile-info-item .value {
+    color: #333;
+}
+
+.section-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #444;
+    margin-top: 24px;
+    margin-bottom: 4px;
+    padding-top: 16px;
+    border-top: 1px solid #eee;
+}
+
+.section-hint {
+    margin-bottom: 16px;
+}
+
+.back-link {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.back-link a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.back-link a:hover {
+    text-decoration: underline;
+}

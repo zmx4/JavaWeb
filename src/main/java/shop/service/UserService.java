@@ -97,4 +97,44 @@ public class UserService {
     public void deleteUserById(Long userId) {
         userRepository.deleteById(userId);
     }
+
+    /**
+     * 更新用户信息
+     */
+    @Transactional
+    public User updateUser(Long userId, String newUsername, String newEmail, String newPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("用户不存在"));
+
+        // 检查用户名是否被其他人使用
+        if (newUsername != null && !newUsername.equals(user.getUsername())) {
+            if (newUsername.length() < 3 || newUsername.length() > 20) {
+                throw new RuntimeException("用户名长度必须在3-20个字符之间");
+            }
+            if (userRepository.existsByUsernameAndIdNot(newUsername, userId)) {
+                throw new RuntimeException("用户名已被他人使用");
+            }
+            user.setUsername(newUsername);
+        }
+
+        // 检查邮箱是否被其他人使用
+        if (newEmail != null && !newEmail.isEmpty() && !newEmail.equals(user.getEmail())) {
+            if (userRepository.existsByEmailAndIdNot(newEmail, userId)) {
+                throw new RuntimeException("邮箱已被他人注册");
+            }
+            user.setEmail(newEmail);
+        } else if (newEmail == null || newEmail.isEmpty()) {
+            user.setEmail(null);
+        }
+
+        // 更新密码（仅当用户填写了新密码时）
+        if (newPassword != null && !newPassword.isEmpty()) {
+            if (newPassword.length() < 6) {
+                throw new RuntimeException("新密码长度不能少于6个字符");
+            }
+            user.setPassword(newPassword);
+        }
+
+        return userRepository.save(user);
+    }
 }
