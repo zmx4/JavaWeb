@@ -2,10 +2,11 @@ package shop.service;
 
 import shop.dao.UserRepository;
 import shop.entity.User;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Sort;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -71,5 +72,27 @@ public class UserService {
      */
     public boolean existsByUsername(String username) {
         return userRepository.existsByUsername(username);
+    }
+
+    /**
+     * 管理员查看所有用户
+     */
+    public List<User> findAllUsers() {
+        return userRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
+    }
+
+    /**
+     * 根据ID查找用户
+     */
+    public Optional<User> findById(Long userId) {
+        return userRepository.findById(userId);
+    }
+
+    /**
+     * 管理员删除用户
+     */
+    @Transactional
+    public void deleteUserById(Long userId) {
+        userRepository.deleteById(userId);
     }
 }
