@@ -24,6 +24,9 @@ public class AuthController {
         this.adminService = adminService;
     }
 
+    @Autowired
+    private AdminService adminService;
+
     /**
      * 显示登录页面
      */
