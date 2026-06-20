@@ -1,6 +1,7 @@
 package shop.controller;
 
 import shop.entity.User;
+import shop.service.AdminService;
 import shop.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,9 @@ public class AuthController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private AdminService adminService;
 
     /**
      * 显示登录页面
@@ -85,6 +89,7 @@ public class AuthController {
             return "redirect:/login";
         }
         model.addAttribute("user", currentUser);
+        model.addAttribute("userIsAdmin", adminService.isAdmin(currentUser.getId()));
         return "home";
     }
 

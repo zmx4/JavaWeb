@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -71,6 +71,26 @@
             color: #333;
         }
 
+        .message {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            border: 1px solid #fcc;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
         button {
             padding: 12px 30px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -97,6 +117,10 @@
         <h1>🎉 欢迎登录</h1>
         <p class="welcome">恭喜您成功登录系统！</p>
 
+        <div th:if="${param.error != null and param.error[0] == 'forbidden'}" class="message error-message">
+            当前账号不是管理员，无法访问用户管理页面。
+        </div>
+
         <div class="user-info">
             <div class="user-info-item">
                 <span class="label">用户ID：</span>
@@ -116,9 +140,14 @@
             </div>
         </div>
 
-        <a th:href="@{/logout}" style="text-decoration: none;">
-            <button>退出登录</button>
-        </a>
+        <div class="actions">
+            <a th:if="${userIsAdmin}" th:href="@{/admin/users}" style="text-decoration: none;">
+                <button type="button">用户管理</button>
+            </a>
+            <a th:href="@{/logout}" style="text-decoration: none;">
+                <button type="button">退出登录</button>
+            </a>
+        </div>
     </div>
 </body>
 </html>
