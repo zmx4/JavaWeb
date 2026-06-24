@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>首页</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .navbar .brand {
+            color: #fff;
+            font-size: 22px;
+            font-weight: 600;
+        }
+        .navbar .user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .navbar .user-info span {
+            color: #fff;
+            font-size: 14px;
+        }
+        .navbar .user-info a {
+            color: #fff;
+            text-decoration: none;
+            background: rgba(255,255,255,0.2);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            transition: background 0.3s;
+        }
+        .navbar .user-info a:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        .main-content {
+            max-width: 800px;
+            margin: 60px auto;
+            text-align: center;
+        }
+        .main-content h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 16px;
+        }
+        .main-content p {
+            color: #777;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+<div class="navbar">
+    <div class="brand">Shop 商城</div>
+    <div class="user-info">
+        <span>欢迎，<strong th:text="${user.username}"></strong></span>
+        <a th:href="@{/user/logout}">退出登录</a>
+    </div>
+</div>
+<div class="main-content">
+    <h1>欢迎来到 Shop 商城</h1>
+    <p>您已成功登录！</p>
+</div>
+</body>
+</html>
