@@ -15,7 +15,8 @@ CREATE TABLE IF NOT EXISTS users (
     INDEX idx_username (username),
     INDEX idx_email (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-/*
-
- */
+-- 字典表
+CREATE TABLE IF NOT EXISTS dictionary (
+    word VARCHAR(160) NOT NULL PRIMARY KEY,
+    translation VARCHAR(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>单词查询</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<div class="container">
+    <div th:replace="~{fragments/navigation :: topNav('dictionary')}"></div>
+
+    <div class="hero">
+        <h1>单词查询</h1>
+        <p>输入单词后，系统会按 dictionary.word 查询对应释义。</p>
+    </div>
+
+    <div class="card">
+        <form th:action="@{/dictionary}" method="get" class="form-row">
+            <div class="full">
+                <label for="word">查询单词</label>
+                <input id="word" name="word" class="input" type="text" th:value="${searchWord}" placeholder="请输入要查询的单词">
+            </div>
+            <div class="full">
+                <button type="submit" class="btn primary">查 询</button>
+            </div>
+        </form>
+
+        <div th:if="${error}" class="alert danger" th:text="${error}"></div>
+
+        <div th:if="${dictionaryEntry}" class="mt-2">
+            <table class="table">
+                <tbody>
+                <tr>
+                    <th>单词</th>
+                    <td th:text="${dictionaryEntry.word}"></td>
+                </tr>
+                <tr>
+                    <th>释义</th>
+                    <td th:text="${dictionaryEntry.translation}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

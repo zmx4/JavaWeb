@@ -3,20 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>首页</title>
-
+    <title>主页</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
 <body>
-<div class="navbar">
-    <div class="brand">Shop 商城</div>
-    <div class="user-info">
-        <span>欢迎，<strong th:text="${user.username}"></strong></span>
-        <a th:href="@{/user/logout}">退出登录</a>
+<div class="container">
+    <div th:replace="~{fragments/navigation :: topNav('home')}"></div>
+
+    <div class="hero">
+        <h1>欢迎你，<span th:text="${loginUser.username}"></span></h1>
+        <p>当前时间：<span th:text="${currentTime}"></span></p>
     </div>
-</div>
-<div class="main-content">
-    <h1>欢迎来到 Shop 商城</h1>
-    <p>您已成功登录！</p>
+
+    <div class="card">
+        <div class="grid columns-2">
+            <div class="card card-soft">
+                <div class="card-title">主页说明</div>
+                <p class="card-meta">这里是系统首页，用于展示登录状态、欢迎信息和当前时间。</p>
+            </div>
+            <div class="card card-soft">
+                <div class="card-title">功能导航</div>
+                <p class="card-meta">使用页面上方导航进入单词查询、登录、注册或退出登录。</p>
+            </div>
+        </div>
+    </div>
 </div>
 </body>
 </html>

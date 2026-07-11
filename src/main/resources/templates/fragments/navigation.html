@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<body>
+<header class="header" th:fragment="topNav(activePage)">
+    <div class="brand">
+        <span class="logo"></span>
+        <div>
+            <div>Shop 商城</div>
+            <div class="kicker">Dictionary Query</div>
+        </div>
+    </div>
+    <div class="nav-wrap">
+        <nav class="nav">
+            <a th:href="@{/}" th:classappend="${activePage} == 'home' ? ' active' : ''">首页</a>
+            <a th:href="@{/dictionary}" th:classappend="${activePage} == 'dictionary' ? ' active' : ''">单词查询</a>
+            <a th:href="@{/user/register}" th:classappend="${activePage} == 'register' ? ' active' : ''">注册</a>
+            <a th:if="${loginUser == null}" th:href="@{/user/login}" th:classappend="${activePage} == 'login' ? ' active' : ''">登录</a>
+            <a th:if="${loginUser != null}" th:href="@{/user/logout}">退出登录</a>
+        </nav>
+        <div class="nav-status" th:if="${loginUser != null}">
+            <span class="muted">欢迎，<strong th:text="${loginUser.username}"></strong></span>
+        </div>
+    </div>
+</header>
+</body>
+</html>
