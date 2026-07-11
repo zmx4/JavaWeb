@@ -1,0 +1,72 @@
+@startuml
+' 单词查询流程图 (亮色模式)
+skinparam backgroundColor #F8F9FA
+skinparam componentStyle rectangle
+skinparam defaultTextColor #1E293B
+skinparam arrowColor #2563EB
+skinparam borderColor #CBD5E1
+skinparam rectangle {
+    BackgroundColor #FFFFFF
+    BorderColor #CBD5E1
+    FontColor #1E293B
+}
+skinparam note {
+    BackgroundColor #EFF6FF
+    BorderColor #93C5FD
+    FontColor #475569
+}
+skinparam partition {
+    BorderColor #CBD5E1
+    FontColor #64748B
+}
+
+title "📖 单词查询流程图"
+
+partition "浏览器端" {
+    :用户访问 /dictionary?word=xxx;
+}
+
+partition "HomeController" {
+    if (session 中是否有 loginUser？) then (否)
+        :redirect:/user/login;
+        stop
+    else (是)
+        :校验通过;
+    endif
+
+    if (word 参数是否为空？) then (是)
+        :渲染 dictionary.html\n(无查询结果提示);
+        stop
+    else (否)
+        :调用 DictionaryService\n.findByWord(word);
+    endif
+}
+
+partition "DictionaryService" {
+    :DictionaryMapper\n.selectList(wrapper);
+}
+
+partition "MySQL (dictionary 表)" {
+    :SELECT * FROM dictionary\nWHERE word = ?;
+}
+
+partition "HomeController (返回)" {
+    if (查询结果是否为 null？) then (是)
+        :设置 error 属性\n"未找到该单词";
+    else (否)
+        :设置 dictionaryEntry 属性\n到 Model 中;
+    endif
+    :返回 dictionary.html 视图;
+}
+
+partition "浏览器端 (渲染)" {
+    if (error 存在) then (是)
+        :显示红色错误提示框;
+    else (dictionaryEntry 存在) then (是)
+        :显示单词卡片\n(word + translation);
+    else
+        :显示引导提示\n(搜索建议);
+    endif
+}
+
+@enduml

@@ -59,8 +59,8 @@
 .question-item {
     padding: 1rem 1rem 1.1rem;
     border-radius: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.015));
+    border: 1px solid #E2E8F0;
+    background: var(--surface);
     display: grid;
     gap: 0.8rem;
 }
@@ -106,9 +106,12 @@
     gap: 0.65rem;
     padding: 0.75rem 0.85rem;
     border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid #E2E8F0;
+    background: #F8FAFC;
     cursor: pointer;
+}
+.choice-option:hover {
+    background: #F1F5F9;
 }
 
 .choice-option input {
@@ -116,7 +119,7 @@
 }
 
 .answer-input {
-    background: rgba(255, 255, 255, 0.02);
+    background: #F8FAFC;
 }
 
 .test-actions {
@@ -133,8 +136,8 @@
 .test-result {
     padding: 1rem 1.1rem;
     border-radius: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid #E2E8F0;
+    background: var(--surface);
 }
 
 .result-summary {
@@ -147,7 +150,7 @@
 .result-summary > div {
     padding: 0.85rem 0.9rem;
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.03);
+    background: #F8FAFC;
 }
 
 .result-number {
@@ -185,7 +188,7 @@
     font-weight: 700;
     padding: 0.55rem 0.9rem;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.2);
 }
 
 .result-section {
@@ -204,7 +207,7 @@
 .result-empty {
     padding: 1rem;
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.02);
+    background: #F8FAFC;
     color: var(--muted);
 }
 
@@ -218,8 +221,8 @@
     gap: 0.9rem;
     padding: 1rem;
     border-radius: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid #E2E8F0;
+    background: var(--surface);
 }
 
 .wrong-index {
@@ -229,8 +232,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 107, 107, 0.14);
-    color: #ffb0b0;
+    background: #FEF2F2;
+    color: #DC2626;
     font-weight: 700;
     flex-shrink: 0;
 }

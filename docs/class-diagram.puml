@@ -1,0 +1,340 @@
+@startuml
+' 英语学习系统 — 完整类图 (亮色模式)
+skinparam backgroundColor #F8F9FA
+skinparam defaultTextColor #1E293B
+skinparam arrowColor #2563EB
+skinparam classBorderColor #CBD5E1
+skinparam packageBorderColor #CBD5E1
+skinparam packageFontColor #475569
+
+skinparam class {
+    BackgroundColor #FFFFFF
+    FontColor #1E293B
+    BorderColor #CBD5E1
+    HeaderBackgroundColor #EFF6FF
+}
+
+skinparam interface {
+    BackgroundColor #F0F9FF
+    FontColor #2563EB
+    BorderColor #93C5FD
+}
+
+hide empty members
+
+title "📦 英语学习系统 — 完整类图"
+
+' ====== 1. Entity 层 ======
+package "shop.entity" #EFF6FF {
+    class User <<entity>> {
+        + Long id
+        + String username
+        + String password
+        + String email
+        + LocalDateTime createTime
+        + LocalDateTime updateTime
+    }
+    note bottom of User
+        @TableName("users")
+    end note
+    note right of User::id : <<PK>> AUTO_INCREMENT
+
+    class TestRecord <<entity>> {
+        + Long id
+        + Long userId
+        + String questionType
+        + String project
+        + String word
+        + String correctTranslation
+        + String userAnswer
+        + Boolean correct
+        + LocalDateTime createTime
+    }
+    note bottom of TestRecord
+        @TableName("test_record")
+    end note
+
+    class DictionaryEntry <<entity>> {
+        + String word
+        + String translation
+    }
+    note bottom of DictionaryEntry
+        @TableName("dictionary")
+    end note
+
+    class Cet4Word <<entity>> {
+        + String word
+        + String translation
+    }
+    note bottom of Cet4Word
+        @TableName("CET4")
+    end note
+
+    class Cet6Word <<entity>> {
+        + String word
+        + String translation
+    }
+    note bottom of Cet6Word
+        @TableName("CET6")
+    end note
+}
+
+' ====== 2. Mapper 层 ======
+package "shop.mapper" #F0FDF4 {
+    interface BaseMapper<T> <<mybatis-plus>> {
+        + List<T> selectList(LambdaQueryWrapper)
+        + int insert(T entity)
+        + T selectById(Serializable)
+    }
+
+    interface UserMapper <<mapper>> {
+    }
+    BaseMapper <|-- UserMapper : extends
+    UserMapper ..> User : maps to
+
+    interface TestRecordMapper <<mapper>> {
+    }
+    BaseMapper <|-- TestRecordMapper : extends
+    TestRecordMapper ..> TestRecord : maps to
+
+    interface DictionaryMapper <<mapper>> {
+    }
+    BaseMapper <|-- DictionaryMapper : extends
+    DictionaryMapper ..> DictionaryEntry : maps to
+
+    interface Cet4Mapper <<mapper>> {
+    }
+    BaseMapper <|-- Cet4Mapper : extends
+    Cet4Mapper ..> Cet4Word : maps to
+
+    interface Cet6Mapper <<mapper>> {
+    }
+    BaseMapper <|-- Cet6Mapper : extends
+    Cet6Mapper ..> Cet6Word : maps to
+}
+
+' ====== 3. Service 层 ======
+package "shop.service" #F0FDF4 {
+    interface IService<T> <<mybatis-plus>> {
+        + boolean save(T entity)
+        + boolean saveBatch(List<T>)
+        + List<T> list(LambdaQueryWrapper)
+    }
+
+    interface UserService <<service>> {
+        + void register(RegisterRequest)
+        + User login(LoginRequest)
+    }
+    IService <|-- UserService : extends
+
+    interface DictionaryService <<service>> {
+        + DictionaryEntry findByWord(String word)
+    }
+    IService <|-- DictionaryService : extends
+
+    interface TestService <<service>> {
+        + List<TestQuestionResponse> generateQuestions(String, int)
+        + TestSubmitResponse submit(String, Long, List<TestAnswerRequest>)
+        + List<WrongWordBookResponse> getWrongWords(Long, String)
+        + List<TestQuestionResponse> generateWrongWordQuestions(Long, String, int)
+    }
+}
+
+' ====== 4. Service Impl 层 ======
+package "shop.service.impl" #ECFDF5 {
+    class ServiceImpl<M extends BaseMapper<T>, T> <<mybatis-plus>> {
+    }
+
+    class UserServiceImpl {
+    }
+    ServiceImpl <|-- UserServiceImpl : extends
+    UserServiceImpl ..|> UserService : implements
+    UserServiceImpl ..> UserMapper : uses
+    UserServiceImpl ..> LoginRequest : uses
+    UserServiceImpl ..> RegisterRequest : uses
+
+    class DictionaryServiceImpl {
+    }
+    ServiceImpl <|-- DictionaryServiceImpl : extends
+    DictionaryServiceImpl ..|> DictionaryService : implements
+    DictionaryServiceImpl ..> DictionaryMapper : uses
+
+    class TestServiceImpl {
+        - Cet4Mapper cet4Mapper
+        - Cet6Mapper cet6Mapper
+    }
+    note right of TestServiceImpl::cet4Mapper
+        构造器注入
+    end note
+    ServiceImpl <|-- TestServiceImpl : extends
+    TestServiceImpl ..|> TestService : implements
+    TestServiceImpl ..> Cet4Mapper : uses
+    TestServiceImpl ..> Cet6Mapper : uses
+    TestServiceImpl ..> TestRecord : creates
+    TestServiceImpl ..> TestQuestionResponse : creates
+    TestServiceImpl ..> TestSubmitResponse : creates
+    TestServiceImpl ..> TestWrongWordResponse : creates
+    TestServiceImpl ..> WrongWordBookResponse : creates
+    TestServiceImpl ..> TestAnswerRequest : reads
+}
+
+' ====== 5. Controller 层 ======
+package "shop.controller" #FEF2F2 {
+    class HomeController {
+        - DictionaryService dictionaryService
+        + String index(HttpSession, Model)
+        + String dictionary(String, HttpSession, Model)
+    }
+    HomeController ..> DictionaryService : injects
+
+    class UserController {
+        - UserService userService
+        + String loginPage(Model)
+        + String login(LoginRequest, BindingResult, HttpSession, Model)
+        + String registerPage(Model)
+        + String register(RegisterRequest, BindingResult, Model)
+        + String logout(HttpSession)
+    }
+    UserController ..> UserService : injects
+    UserController ..> LoginRequest : accepts
+    UserController ..> RegisterRequest : accepts
+
+    class TestController {
+        - TestService testService
+        + String testPage(HttpSession, Model)
+        + String resultPage(HttpSession, Model)
+        + Result questions(String, int, HttpSession)
+        + Result submit(TestSubmitRequest, BindingResult, HttpSession)
+        + String wrongWordsPage(HttpSession, Model)
+        + Result wrongWordsList(String, HttpSession)
+        + String wrongWordsTestPage(HttpSession, Model)
+        + Result wrongWordsTestQuestions(String, int, HttpSession)
+        + Result submitWrongWordsTest(TestSubmitRequest, BindingResult, HttpSession)
+    }
+    TestController ..> TestService : injects
+    TestController ..> TestSubmitRequest : accepts
+
+    class GlobalModelAdvice <<ControllerAdvice>> {
+        + User loginUser(HttpSession)
+    }
+}
+
+' ====== 6. DTO 层 ======
+package "shop.dto" #F8FAFC {
+    class LoginRequest {
+        + String username
+        + String password
+    }
+
+    class RegisterRequest {
+        + String username
+        + String password
+        + String confirmPassword
+        + String email
+    }
+
+    class TestAnswerRequest {
+        + String questionId
+        + String questionType
+        + String word
+        + String answer
+    }
+
+    class TestQuestionResponse {
+        + String questionId
+        + String questionType
+        + String word
+        + String prompt
+        + List<String> options
+    }
+
+    class TestSubmitRequest {
+        + String project
+        + List<TestAnswerRequest> answers
+    }
+    TestSubmitRequest *--> "1..*" TestAnswerRequest : contains
+
+    class TestSubmitResponse {
+        + String project
+        + int totalCount
+        + int correctCount
+        + int wrongCount
+        + int savedCount
+        + List<TestWrongWordResponse> wrongWords
+        + String redirectUrl
+    }
+    TestSubmitResponse *--> "0..*" TestWrongWordResponse : contains
+
+    class TestWrongWordResponse {
+        + String questionType
+        + String word
+        + String userAnswer
+        + String correctTranslation
+    }
+
+    class WrongWordBookResponse {
+        + Long id
+        + String questionType
+        + String project
+        + String word
+        + String correctTranslation
+        + String userAnswer
+        + LocalDateTime createTime
+    }
+}
+
+' ====== 7. Common 层 ======
+package "shop.common" #FFF7ED {
+    class Result<T> {
+        - int code
+        - String message
+        - T data
+        + static success(String)
+        + static success(String, T)
+        + static error(String)
+        + static error(int, String)
+    }
+}
+
+' ====== 8. Application ======
+package "shop" #F1F5F9 {
+    class ShopApplication {
+        + main(String[])
+    }
+    note bottom of ShopApplication
+        @SpringBootApplication
+        @MapperScan("shop.mapper")
+    end note
+}
+
+' ====== 关系线 ======
+
+' Controller → Service (注入)
+HomeController --> DictionaryService : <<注入>>
+UserController --> UserService : <<注入>>
+TestController --> TestService : <<注入>>
+
+' Controller → DTO
+TestController --> TestQuestionResponse : <<返回>>
+TestController --> TestSubmitResponse : <<返回>>
+TestController --> WrongWordBookResponse : <<返回>>
+
+' Controller → Result
+TestController --> Result : <<返回>>
+
+' Service → Mapper
+UserServiceImpl --> UserMapper : <<注入>>
+DictionaryServiceImpl --> DictionaryMapper : <<注入>>
+TestServiceImpl --> Cet4Mapper : <<注入>>
+TestServiceImpl --> Cet6Mapper : <<注入>>
+
+' Service → DTO
+UserServiceImpl ..> LoginRequest : <<使用>>
+UserServiceImpl ..> RegisterRequest : <<使用>>
+TestServiceImpl ..> TestAnswerRequest : <<使用>>
+
+' Global
+GlobalModelAdvice --> User : <<返回>>
+GlobalModelAdvice ..> HttpSession : <<读取>>
+
+@enduml

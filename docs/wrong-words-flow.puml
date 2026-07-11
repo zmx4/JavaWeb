@@ -1,0 +1,139 @@
+@startuml
+' 错题本流程图 (亮色模式)
+skinparam backgroundColor #F8F9FA
+skinparam componentStyle rectangle
+skinparam defaultTextColor #1E293B
+skinparam arrowColor #DC2626
+skinparam borderColor #CBD5E1
+skinparam rectangle {
+    BackgroundColor #FFFFFF
+    BorderColor #CBD5E1
+    FontColor #1E293B
+}
+skinparam note {
+    BackgroundColor #FEF2F2
+    BorderColor #FCA5A5
+    FontColor #475569
+}
+skinparam partition {
+    BorderColor #CBD5E1
+    FontColor #64748B
+}
+
+title "📕 错题本流程图"
+
+partition "浏览器端" {
+    :用户访问 /test/wrong-words;
+    :页面自动加载错题列表;
+    note right
+        AJAX GET
+        /test/wrong-words/list?project=
+    end note
+}
+
+partition "TestController" {
+    if (session 校验是否登录？) then (否)
+        :redirect:/user/login;
+        stop
+    else (是)
+        :调用 TestService\n.getWrongWords(userId, project);
+    endif
+}
+
+partition "TestServiceImpl" {
+    :构建 LambdaQueryWrapper;
+    note right
+        eq(userId)
+        eq(correct, false)
+        如果 project 不为空则 eq(project)
+    end note
+    :this.list(wrapper);
+    :按 createTime DESC 排序;
+    :逐条转换为\nWrongWordBookResponse DTO;
+    :返回 List<WrongWordBookResponse>;
+}
+
+partition "MySQL (test_record 表)" {
+    :SELECT * FROM test_record\nWHERE user_id = ?\nAND is_correct = false\nORDER BY create_time DESC;
+}
+
+partition "浏览器端 (渲染)" {
+    if (列表为空？) then (是)
+        :显示空状态提示\n🎉 "暂无错题"\n+ 去测试按钮;
+        stop
+    else (否)
+        :显示错题总数;
+        :循环渲染每条错题卡片;
+        note right
+            每条显示:
+            - 单词
+            - 项目标签 / 题型标签
+            - 你的答案 (红色删除线)
+            - 正确答案 (绿色)
+            - 答题时间
+        end note
+    endif
+}
+
+partition "用户操作" {
+    :切换 "筛选项目" 下拉框;
+    note right
+        触发 onChange
+        重新调用 /list API
+    end note
+    :点击 "刷新" 按钮;
+    :点击 "开始错题测试";
+}
+
+' ============ 错题测试子流程 ============
+
+partition "错题专项测试" {
+    :跳转 /test/wrong-words-test;
+    :点击 "开始错题测试";
+    note right
+        AJAX GET
+        /test/wrong-words-test/questions
+        ?project=&count=10
+    end note
+}
+
+partition "TestServiceImpl (错题生成)" {
+    :查询错题记录\n(userId + is_correct=false);
+    :按单词去重\n(每个单词只保留最近一条);
+    :随机打乱;
+    :按 50% 比例\n分配 choice / fill;
+    :构建选择题选项\n(从所有错题翻译中取干扰项);
+    :返回 List<TestQuestionResponse>;
+}
+
+partition "浏览器端 (错题测试)" {
+    :渲染选择题 + 填空题;
+    :用户作答;
+    :点击 "提交并保存";
+    note right
+        AJAX POST
+        /test/wrong-words-test/submit
+    end note
+}
+
+partition "TestController" {
+    :复用 TestService.submit()\n保存到 test_record;
+    note right
+        与普通测试共用
+        同一提交逻辑
+    end note
+    :存入 Session;
+    :返回结果;
+}
+
+partition "浏览器端 (结果)" {
+    if (redirectUrl) then (是)
+        :跳转 /test/result;
+        stop
+    else (否)
+        :显示内联结果;
+        :提供 "再来一次"\n+ "查看错题本" 链接;
+    endif
+}
+
+@enduml

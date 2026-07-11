@@ -19,9 +19,9 @@
             <!-- <a th:if="${loginUser == null}" th:href="@{/user/login}" th:classappend="${activePage} == 'login' ? ' active' : ''">登录</a> -->
             <a th:if="${loginUser != null}" th:href="@{/user/logout}">退出登录</a>
         </nav>
-        <div class="nav-status" th:if="${loginUser != null}">
+        <!-- <div class="nav-status" th:if="${loginUser != null}">
             <span class="muted">欢迎，<strong th:text="${loginUser.username}"></strong></span>
-        </div>
+        </div> -->
     </div>
 </header>
 </body>

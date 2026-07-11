@@ -1,0 +1,139 @@
+@startuml
+' 测试流程图 (亮色模式)
+skinparam backgroundColor #F8F9FA
+skinparam componentStyle rectangle
+skinparam defaultTextColor #1E293B
+skinparam arrowColor #2563EB
+skinparam borderColor #CBD5E1
+skinparam rectangle {
+    BackgroundColor #FFFFFF
+    BorderColor #CBD5E1
+    FontColor #1E293B
+}
+skinparam note {
+    BackgroundColor #EFF6FF
+    BorderColor #93C5FD
+    FontColor #475569
+}
+skinparam partition {
+    BorderColor #CBD5E1
+    FontColor #64748B
+}
+
+title "📝 测试流程图"
+
+partition "浏览器端" {
+    :用户访问 /test;
+    :选择项目 CET4 / CET6;
+    :点击 "开始测试";
+    note right
+        AJAX GET
+        /test/questions?project=CET4&count=10
+    end note
+}
+
+partition "TestController" {
+    if (session 校验是否登录？) then (否)
+        :redirect:/user/login;
+        stop
+    else (是)
+        :调用 TestService\n.generateQuestions(project, count);
+    endif
+}
+
+partition "TestServiceImpl" {
+    :loadWordItems(project);
+    note right
+        根据 project 查询
+        Cet4Mapper 或 Cet6Mapper
+    end note
+
+    if (题库是否为空？) then (是)
+        :抛出异常\n"当前测试项目没有可用题目";
+        stop
+    else (否)
+        :随机打乱单词列表;
+        :按 50% 比例分配\n选择题(choice) 和 填空题(fill);
+    endif
+
+    :为每道选择题构建 4 个选项\n(1 正确 + 3 随机干扰项);
+
+    :为每道填空题构建提示\n(根据翻译填写单词);
+
+    :返回 List<TestQuestionResponse>;
+}
+
+partition "浏览器端 (渲染题目)" {
+    if (返回结果为 error) then (是)
+        :显示错误提示;
+        stop
+    else (是)
+        :渲染选择题区域\n(radio 按钮组);
+        :渲染填空题区域\n(文本输入框);
+        :启用 "提交并保存" 按钮;
+    endif
+
+    :用户逐题作答;
+    :点击 "提交并保存";
+    note right
+        AJAX POST /test/submit
+        JSON: { project, answers[] }
+    end note
+}
+
+partition "TestController" {
+    :@Valid 校验请求体;
+    if (校验失败？) then (是)
+        :返回参数错误;
+        stop
+    else (否)
+        :调用 TestService\n.submit(project, userId, answers);
+    endif
+}
+
+partition "TestServiceImpl" {
+    :逐题遍历 answers;
+
+    repeat
+        :解析正确翻译\n(resolveTranslation);
+        :判断答案是否正确\n(isCorrectAnswer);
+        if (正确？) then (是)
+            :correctCount++;
+        else (否)
+            :记录到 wrongWords 列表;
+        endif
+        :构建 TestRecord 实体;
+        :保存到数据库;
+    repeat while (还有下一题？) is (是)
+    ->否;
+
+    :this.saveBatch(records);
+    :构建 TestSubmitResponse\n(总分 / 正确数 / 错误数 / 错题列表);
+    :存入 Session\n(latestTestResult);
+    :返回结果;
+}
+
+partition "MySQL" {
+    :INSERT INTO test_record\n(批量保存每条答题记录);
+}
+
+partition "浏览器端" {
+    if (返回 redirectUrl) then (是)
+        :跳转到 /test/result;
+    else (否)
+        :显示内联结果面板\n(正确数 / 错误数 / 已保存);
+    endif
+}
+
+partition "测试结果页" {
+    :Thymeleaf 渲染 test-result.html;
+    :展示得分汇总卡片;
+    if (有错题？) then (是)
+        :逐条展示错题\n(单词 / 你的答案 / 正确答案);
+    else (否)
+        :显示"本次没有答错的单词";
+    endif
+    :提供"返回重新测试"链接;
+}
+
+@enduml
