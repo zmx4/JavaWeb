@@ -3,48 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>用户注册</title>
+    <title>用户注册 · 英语学习系统</title>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
 <body>
-<div class="container">
-    <div th:replace="~{fragments/navigation :: topNav('register')}"></div>
+<div class="auth-page">
+    <div class="container">
+        <!-- Hero -->
+        <div class="auth-hero">
+            <div class="auth-icon">📚</div>
+            <h1>创建账号</h1>
+            <p>注册后即可使用单词查询、测试与错题本功能</p>
+        </div>
 
-    <div class="card auth-card">
-        <h2>用户注册</h2>
+        <!-- 注册卡片 -->
+        <div class="auth-card">
+            <h2>用户注册</h2>
 
-        <div th:if="${error}" class="alert danger" th:text="${error}"></div>
+            <div th:if="${error}" class="alert danger" th:text="${error}"></div>
 
-        <form th:action="@{/user/register}" th:object="${registerRequest}" method="post" class="stack-form">
-            <div class="form-group">
-                <label>用户名</label>
-                <input class="input" type="text" th:field="*{username}" placeholder="请输入用户名（2-20个字符）"/>
-                <div class="error-msg" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
+            <form th:action="@{/user/register}" th:object="${registerRequest}" method="post" class="stack-form" autocomplete="off">
+                <div class="form-group">
+                    <label for="username">用户名</label>
+                    <input id="username" class="input" type="text" th:field="*{username}" placeholder="2-20 个字符" autocomplete="username"/>
+                    <div class="error-msg" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">邮箱（选填）</label>
+                    <input id="email" class="input" type="email" th:field="*{email}" placeholder="example@email.com" autocomplete="email"/>
+                    <div class="error-msg" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <input id="password" class="input" type="password" th:field="*{password}" placeholder="6-20 个字符" autocomplete="new-password"/>
+                    <div class="error-msg" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">确认密码</label>
+                    <input id="confirmPassword" class="input" type="password" th:field="*{confirmPassword}" placeholder="请再次输入密码" autocomplete="new-password"/>
+                    <div class="error-msg" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></div>
+                </div>
+
+                <button type="submit" class="btn primary">注 册</button>
+            </form>
+
+            <div class="auth-divider">
+                已有账号？<a th:href="@{/user/login}">去登录 →</a>
             </div>
-
-            <div class="form-group">
-                <label>邮箱</label>
-                <input class="input" type="email" th:field="*{email}" placeholder="请输入邮箱（选填）"/>
-                <div class="error-msg" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
-            </div>
-
-            <div class="form-group">
-                <label>密码</label>
-                <input class="input" type="password" th:field="*{password}" placeholder="请输入密码（6-20个字符）"/>
-                <div class="error-msg" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
-            </div>
-
-            <div class="form-group">
-                <label>确认密码</label>
-                <input class="input" type="password" th:field="*{confirmPassword}" placeholder="请再次输入密码"/>
-                <div class="error-msg" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></div>
-            </div>
-
-            <button type="submit" class="btn primary">注 册</button>
-        </form>
-
-        <div class="link-text mt-2">
-            已有账号？<a th:href="@{/user/login}">去登录</a>
         </div>
     </div>
 </div>

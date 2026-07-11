@@ -14,6 +14,7 @@
             <a th:href="@{/}" th:classappend="${activePage} == 'home' ? ' active' : ''">首页</a>
             <a th:href="@{/dictionary}" th:classappend="${activePage} == 'dictionary' ? ' active' : ''">单词查询</a>
             <a th:href="@{/test}" th:classappend="${activePage} == 'test' ? ' active' : ''">测试</a>
+            <a th:href="@{/test/wrong-words}" th:classappend="${activePage} == 'wrong-words' ? ' active' : ''">错题本</a>
             <!-- <a th:href="@{/user/register}" th:classappend="${activePage} == 'register' ? ' active' : ''">注册</a> -->
             <!-- <a th:if="${loginUser == null}" th:href="@{/user/login}" th:classappend="${activePage} == 'login' ? ' active' : ''">登录</a> -->
             <a th:if="${loginUser != null}" th:href="@{/user/logout}">退出登录</a>

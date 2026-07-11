@@ -15,6 +15,7 @@ import shop.common.Result;
 import shop.dto.TestQuestionResponse;
 import shop.dto.TestSubmitRequest;
 import shop.dto.TestSubmitResponse;
+import shop.dto.WrongWordBookResponse;
 import shop.entity.User;
 import shop.service.TestService;
 
@@ -80,6 +81,88 @@ public class TestController {
     public Result<TestSubmitResponse> submit(@Valid @RequestBody TestSubmitRequest request,
                                              BindingResult bindingResult,
                                              HttpSession session) {
+        User loginUser = (User) session.getAttribute("loginUser");
+        if (loginUser == null) {
+            return Result.error(401, "请先登录");
+        }
+
+        if (bindingResult.hasErrors()) {
+            return Result.error(bindingResult.getAllErrors().get(0).getDefaultMessage());
+        }
+
+        try {
+            TestSubmitResponse response = testService.submit(request.getProject(), loginUser.getId(), request.getAnswers());
+            session.setAttribute("latestTestResult", response);
+            return Result.success("测试数据已保存", response);
+        } catch (RuntimeException e) {
+            return Result.error(e.getMessage());
+        }
+    }
+
+    // ==================== 错题本 ====================
+
+    @GetMapping("/wrong-words")
+    public String wrongWordsPage(HttpSession session, Model model) {
+        User loginUser = (User) session.getAttribute("loginUser");
+        if (loginUser == null) {
+            return "redirect:/user/login";
+        }
+        model.addAttribute("activeProject", "");
+        return "wrong-words";
+    }
+
+    @GetMapping("/wrong-words/list")
+    @ResponseBody
+    public Result<List<WrongWordBookResponse>> wrongWordsList(@RequestParam(value = "project", required = false, defaultValue = "") String project,
+                                                              HttpSession session) {
+        User loginUser = (User) session.getAttribute("loginUser");
+        if (loginUser == null) {
+            return Result.error(401, "请先登录");
+        }
+
+        try {
+            List<WrongWordBookResponse> list = testService.getWrongWords(loginUser.getId(), project);
+            return Result.success("加载成功", list);
+        } catch (RuntimeException e) {
+            return Result.error(e.getMessage());
+        }
+    }
+
+    // ==================== 错题测试 ====================
+
+    @GetMapping("/wrong-words-test")
+    public String wrongWordsTestPage(HttpSession session, Model model) {
+        User loginUser = (User) session.getAttribute("loginUser");
+        if (loginUser == null) {
+            return "redirect:/user/login";
+        }
+        model.addAttribute("activeProject", "");
+        return "wrong-words-test";
+    }
+
+    @GetMapping("/wrong-words-test/questions")
+    @ResponseBody
+    public Result<List<TestQuestionResponse>> wrongWordsTestQuestions(@RequestParam(value = "project", required = false, defaultValue = "") String project,
+                                                                      @RequestParam(value = "count", defaultValue = "10") int count,
+                                                                      HttpSession session) {
+        User loginUser = (User) session.getAttribute("loginUser");
+        if (loginUser == null) {
+            return Result.error(401, "请先登录");
+        }
+
+        try {
+            List<TestQuestionResponse> questions = testService.generateWrongWordQuestions(loginUser.getId(), project, count);
+            return Result.success("加载成功", questions);
+        } catch (RuntimeException e) {
+            return Result.error(e.getMessage());
+        }
+    }
+
+    @PostMapping("/wrong-words-test/submit")
+    @ResponseBody
+    public Result<TestSubmitResponse> submitWrongWordsTest(@Valid @RequestBody TestSubmitRequest request,
+                                                           BindingResult bindingResult,
+                                                           HttpSession session) {
         User loginUser = (User) session.getAttribute("loginUser");
         if (loginUser == null) {
             return Result.error(401, "请先登录");

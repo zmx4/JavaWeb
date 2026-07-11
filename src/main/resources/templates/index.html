@@ -3,27 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>主页</title>
+    <title>主页 · 英语学习系统</title>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
 <body>
 <div class="container">
     <div th:replace="~{fragments/navigation :: topNav('home')}"></div>
 
-    <div class="hero">
-        <h1>欢迎你，<span th:text="${loginUser.username}"></span></h1>
-        <p>当前时间：<span th:text="${currentTime}"></span></p>
+    <!-- 欢迎区域 -->
+    <div class="hero fade-in">
+        <h1>👋 欢迎你，<span th:text="${loginUser.username}"></span></h1>
+        <p>当前时间：<span th:text="${currentTime}"></span> · 开启今日的学习之旅</p>
     </div>
 
-    <div class="card">
+    <!-- 功能快捷入口 -->
+    <div class="grid columns-3" style="margin-bottom:1.25rem;">
+        <a th:href="@{/dictionary}" class="card card-hover fade-in-up" style="text-decoration:none;animation-delay:0.1s;">
+            <div style="font-size:2rem;margin-bottom:0.5rem;">📖</div>
+            <div class="card-title">单词查询</div>
+            <p class="card-meta">输入单词快速获取释义</p>
+        </a>
+        <a th:href="@{/test}" class="card card-hover fade-in-up" style="text-decoration:none;animation-delay:0.2s;">
+            <div style="font-size:2rem;margin-bottom:0.5rem;">📝</div>
+            <div class="card-title">英语测试</div>
+            <p class="card-meta">CET4 / CET6 选择题与填空题</p>
+        </a>
+        <a th:href="@{/test/wrong-words}" class="card card-hover fade-in-up" style="text-decoration:none;animation-delay:0.3s;">
+            <div style="font-size:2rem;margin-bottom:0.5rem;">📕</div>
+            <div class="card-title">错题本</div>
+            <p class="card-meta">回顾错题，巩固记忆</p>
+        </a>
+    </div>
+
+    <!-- 系统介绍 -->
+    <div class="card fade-in-up" style="animation-delay:0.35s;">
         <div class="grid columns-2">
             <div class="card card-soft">
-                <div class="card-title">主页说明</div>
-                <p class="card-meta">这里是系统首页，用于展示登录状态、欢迎信息和当前时间。</p>
+                <div class="card-title">📌 系统说明</div>
+                <p class="card-meta" style="margin-bottom:0;">英语学习系统提供单词查询、CET4/CET6 词汇测试及错题回顾功能，帮助你高效学习英语词汇。</p>
             </div>
             <div class="card card-soft">
-                <div class="card-title">功能导航</div>
-                <p class="card-meta">使用页面上方导航进入单词查询、登录、注册或退出登录。</p>
+                <div class="card-title">⚡ 快捷操作</div>
+                <p class="card-meta" style="margin-bottom:0;">使用上方导航栏快速切换功能模块，或点击左侧快捷卡片直接进入。</p>
             </div>
         </div>
     </div>

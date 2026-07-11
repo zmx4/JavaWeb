@@ -1,0 +1,230 @@
+/* ========== 错题本页面 ========== */
+.ww-page .ww-panel {
+    display: grid;
+    gap: 1.25rem;
+}
+
+.ww-hero h1 {
+    margin-bottom: 0.4rem;
+}
+
+.ww-toolbar {
+    display: flex;
+    gap: 0.85rem;
+    align-items: end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.ww-filter-group {
+    display: flex;
+    gap: 0.75rem;
+    align-items: end;
+    flex-wrap: wrap;
+}
+
+.ww-filter-group .form-group {
+    min-width: 160px;
+}
+
+.ww-count-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.9rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--muted);
+    font-size: 0.92rem;
+}
+
+.ww-count-badge strong {
+    color: var(--text);
+}
+
+.ww-list {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.ww-empty {
+    padding: 2.5rem 1.5rem;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.015);
+    text-align: center;
+    color: var(--muted);
+    border: 1px dashed rgba(255, 255, 255, 0.06);
+}
+
+.ww-empty-icon {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 0.6rem;
+}
+
+.ww-empty-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.35rem;
+}
+
+.ww-empty-desc {
+    font-size: 0.92rem;
+    color: var(--muted);
+    margin-bottom: 1rem;
+}
+
+.ww-item {
+    display: flex;
+    gap: 0.9rem;
+    padding: 1rem;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.015));
+    align-items: flex-start;
+}
+
+.ww-item-index {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 107, 107, 0.14);
+    color: #ffb0b0;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.ww-item-body {
+    flex: 1;
+    display: grid;
+    gap: 0.3rem;
+}
+
+.ww-item-word {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.ww-item-meta {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+
+.ww-item-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.ww-item-translation {
+    color: var(--muted);
+    font-size: 0.92rem;
+}
+
+.ww-item-answer {
+    font-size: 0.92rem;
+}
+
+.ww-item-answer .label {
+    color: var(--muted);
+}
+
+.ww-item-answer .user-val {
+    color: var(--danger);
+    text-decoration: line-through;
+}
+
+.ww-item-answer .correct-val {
+    color: var(--success);
+}
+
+.ww-item-time {
+    font-size: 0.85rem;
+    color: var(--muted);
+    opacity: 0.7;
+}
+
+/* ========== 错题测试页面 ========== */
+.wt-page .wt-panel {
+    display: grid;
+    gap: 1.25rem;
+}
+
+.wt-hero h1 {
+    margin-bottom: 0.4rem;
+}
+
+.wt-toolbar {
+    display: flex;
+    gap: 0.85rem;
+    align-items: end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.wt-intro {
+    margin-bottom: 1rem;
+}
+
+.wt-workspace {
+    display: grid;
+    gap: 1rem;
+}
+
+.wt-status {
+    margin: 0;
+}
+
+/* 复用 test.css 中的 question-item 等样式 */
+.wt-question-list {
+    display: grid;
+    gap: 0.9rem;
+}
+
+.wt-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.wt-actions .btn {
+    min-width: 140px;
+    justify-content: center;
+}
+
+.wt-result {
+    padding: 1rem 1.1rem;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* ========== 响应式 ========== */
+@media (max-width: 720px) {
+    .ww-filter-group {
+        width: 100%;
+    }
+
+    .ww-filter-group .form-group {
+        flex: 1;
+        min-width: 120px;
+    }
+
+    .ww-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .ww-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

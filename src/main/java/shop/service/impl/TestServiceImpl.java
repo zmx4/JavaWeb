@@ -8,6 +8,7 @@ import shop.dto.TestAnswerRequest;
 import shop.dto.TestQuestionResponse;
 import shop.dto.TestSubmitResponse;
 import shop.dto.TestWrongWordResponse;
+import shop.dto.WrongWordBookResponse;
 import shop.entity.Cet4Word;
 import shop.entity.Cet6Word;
 import shop.entity.TestRecord;
@@ -156,6 +157,104 @@ public class TestServiceImpl extends ServiceImpl<TestRecordMapper, TestRecord> i
         response.setWrongWords(wrongWords);
         response.setRedirectUrl("/test/result");
         return response;
+    }
+
+    @Override
+    public List<WrongWordBookResponse> getWrongWords(Long userId, String project) {
+        LambdaQueryWrapper<TestRecord> wrapper = new LambdaQueryWrapper<TestRecord>()
+                .eq(TestRecord::getUserId, userId)
+                .eq(TestRecord::getCorrect, false);
+
+        if (StringUtils.hasText(project)) {
+            wrapper.eq(TestRecord::getProject, normalizeProject(project));
+        }
+
+        wrapper.orderByDesc(TestRecord::getCreateTime);
+
+        List<TestRecord> records = this.list(wrapper);
+        List<WrongWordBookResponse> result = new ArrayList<>();
+
+        for (TestRecord record : records) {
+            WrongWordBookResponse dto = new WrongWordBookResponse();
+            dto.setId(record.getId());
+            dto.setQuestionType(record.getQuestionType());
+            dto.setProject(record.getProject());
+            dto.setWord(record.getWord());
+            dto.setCorrectTranslation(record.getCorrectTranslation());
+            dto.setUserAnswer(record.getUserAnswer());
+            dto.setCreateTime(record.getCreateTime());
+            result.add(dto);
+        }
+
+        return result;
+    }
+
+    @Override
+    public List<TestQuestionResponse> generateWrongWordQuestions(Long userId, String project, int count) {
+        LambdaQueryWrapper<TestRecord> wrapper = new LambdaQueryWrapper<TestRecord>()
+                .eq(TestRecord::getUserId, userId)
+                .eq(TestRecord::getCorrect, false);
+
+        if (StringUtils.hasText(project)) {
+            wrapper.eq(TestRecord::getProject, normalizeProject(project));
+        }
+
+        wrapper.orderByDesc(TestRecord::getCreateTime);
+
+        List<TestRecord> records = this.list(wrapper);
+
+        if (records.isEmpty()) {
+            throw new RuntimeException("错题本中没有题目，请先做几次测试");
+        }
+
+        // 去重：每个单词只保留最近的一条错题记录
+        Map<String, TestRecord> uniqueRecords = new LinkedHashMap<>();
+        for (TestRecord record : records) {
+            uniqueRecords.putIfAbsent(record.getWord(), record);
+        }
+
+        List<TestRecord> distinctRecords = new ArrayList<>(uniqueRecords.values());
+        Collections.shuffle(distinctRecords, ThreadLocalRandom.current());
+
+        int targetCount = count > 0 ? Math.min(count, distinctRecords.size()) : distinctRecords.size();
+        int choiceCount = Math.max(1, targetCount / 2);
+        int fillCount = Math.max(1, targetCount - choiceCount);
+
+        List<TestRecord> choiceItems = distinctRecords.stream().limit(choiceCount).collect(Collectors.toCollection(ArrayList::new));
+        List<TestRecord> fillItems = distinctRecords.stream().skip(choiceCount).limit(fillCount).collect(Collectors.toCollection(ArrayList::new));
+
+        // 收集所有错题的翻译作为干扰项
+        List<String> allTranslations = distinctRecords.stream()
+                .map(TestRecord::getCorrectTranslation)
+                .distinct()
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        List<TestQuestionResponse> questions = new ArrayList<>();
+
+        for (int i = 0; i < choiceItems.size(); i++) {
+            TestRecord item = choiceItems.get(i);
+            TestQuestionResponse response = new TestQuestionResponse();
+            response.setQuestionId("wrong-choice-" + (i + 1));
+            response.setQuestionType("choice");
+            response.setWord(item.getWord());
+            response.setPrompt("选择下列单词的正确翻译：" + item.getWord());
+            response.setOptions(buildChoiceOptions(item.getCorrectTranslation(), allTranslations));
+            questions.add(response);
+        }
+
+        for (int i = 0; i < fillItems.size(); i++) {
+            TestRecord item = fillItems.get(i);
+            TestQuestionResponse response = new TestQuestionResponse();
+            response.setQuestionId("wrong-fill-" + (i + 1));
+            response.setQuestionType("fill");
+            response.setWord(item.getWord());
+            response.setPrompt("根据翻译写出对应单词：" + item.getCorrectTranslation());
+            response.setOptions(Collections.emptyList());
+            questions.add(response);
+        }
+
+        Collections.shuffle(questions, ThreadLocalRandom.current());
+        return questions;
     }
 
     private List<WordItem> loadWordItems(String project) {

@@ -3,37 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>用户登录</title>
+    <title>用户登录 · 英语学习系统</title>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
-
 </head>
 <body>
-<div class="container">
-    <div th:replace="~{fragments/navigation :: topNav('login')}"></div>
+<div class="auth-page">
+    <div class="container">
+        <!-- Hero -->
+        <div class="auth-hero">
+            <div class="auth-icon">🔐</div>
+            <h1>欢迎回来</h1>
+            <p>登录以继续使用英语学习系统</p>
+        </div>
 
-    <div class="card auth-card">
-        <h2>用户登录</h2>
+        <!-- 登录卡片 -->
+        <div class="auth-card">
+            <h2>用户登录</h2>
 
-        <div th:if="${error}" class="alert danger" th:text="${error}"></div>
+            <div th:if="${error}" class="alert danger" th:text="${error}"></div>
 
-        <form th:action="@{/user/login}" th:object="${loginRequest}" method="post" class="stack-form">
-            <div class="form-group">
-                <label>用户名</label>
-                <input class="input" type="text" th:field="*{username}" placeholder="请输入用户名"/>
-                <div class="error-msg" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
+            <form th:action="@{/user/login}" th:object="${loginRequest}" method="post" class="stack-form" autocomplete="off">
+                <div class="form-group">
+                    <label for="username">用户名</label>
+                    <input id="username" class="input" type="text" th:field="*{username}" placeholder="请输入用户名" autocomplete="username"/>
+                    <div class="error-msg" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <input id="password" class="input" type="password" th:field="*{password}" placeholder="请输入密码" autocomplete="current-password"/>
+                    <div class="error-msg" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                </div>
+
+                <button type="submit" class="btn primary">登 录</button>
+            </form>
+
+            <div class="auth-divider">
+                还没有账号？<a th:href="@{/user/register}">立即注册 →</a>
             </div>
-
-            <div class="form-group">
-                <label>密码</label>
-                <input class="input" type="password" th:field="*{password}" placeholder="请输入密码"/>
-                <div class="error-msg" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
-            </div>
-
-            <button type="submit" class="btn primary">登 录</button>
-        </form>
-
-        <div class="link-text mt-2">
-            还没有账号？<a th:href="@{/user/register}">立即注册</a>
         </div>
     </div>
 </div>

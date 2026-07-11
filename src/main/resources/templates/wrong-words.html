@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>错题本</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" th:href="@{/css/wrong-words.css}">
+    <script th:src="@{/js/jquery-4.0.0.min.js}"></script>
+</head>
+<body>
+<div class="container ww-page">
+    <div th:replace="~{fragments/navigation :: topNav('wrong-words')}"></div>
+
+    <div class="hero ww-hero">
+        <h1>📕 错题本</h1>
+        <p>这里记录了你在测试中答错的单词。可以筛选项目查看，也可一键进入错题专项测试。</p>
+    </div>
+
+    <div class="card ww-panel">
+        <div class="ww-toolbar">
+            <div class="ww-filter-group">
+                <div class="form-group">
+                    <label for="wwProjectSelect">筛选项目</label>
+                    <select id="wwProjectSelect" class="input">
+                        <option value="">全部项目</option>
+                        <option value="CET4">CET4</option>
+                        <option value="CET6">CET6</option>
+                    </select>
+                </div>
+                <button type="button" id="wwRefreshBtn" class="btn">刷新</button>
+            </div>
+            <div>
+                <a th:href="@{/test/wrong-words-test}" class="btn primary" id="wwStartTestBtn">开始错题测试</a>
+            </div>
+        </div>
+
+        <div class="ww-count-badge" id="wwCountBadge">
+            共 <strong id="wwCount">0</strong> 个错题
+        </div>
+
+        <div id="wwList" class="ww-list"></div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+$(function () {
+    const $projectSelect = $('#wwProjectSelect');
+    const $refreshBtn = $('#wwRefreshBtn');
+    const $list = $('#wwList');
+    const $count = $('#wwCount');
+
+    function escapeHtml(value) {
+        return String(value || '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#39;');
+    }
+
+    function formatTime(timeStr) {
+        if (!timeStr) return '';
+        return timeStr.replace('T', ' ').substring(0, 19);
+    }
+
+    function getQuestionTypeLabel(type) {
+        return type === 'choice' ? '选择题' : '填空题';
+    }
+
+    function renderList(data) {
+        if (!data || data.length === 0) {
+            $list.html(`
+                <div class="ww-empty">
+                    <span class="ww-empty-icon">🎉</span>
+                    <div class="ww-empty-title">暂无错题</div>
+                    <div class="ww-empty-desc">你还没有做错过单词，继续保持！去测试中心练练手吧。</div>
+                    <a th:href="@{/test}" class="btn primary">去测试</a>
+                </div>
+            `);
+            $count.text('0');
+            return;
+        }
+
+        $count.text(data.length);
+
+        const html = data.map(function (item, index) {
+            return `
+                <div class="ww-item">
+                    <div class="ww-item-index">${index + 1}</div>
+                    <div class="ww-item-body">
+                        <div class="ww-item-word">${escapeHtml(item.word)}</div>
+                        <div class="ww-item-meta">
+                            <span>📂 ${escapeHtml(item.project)}</span>
+                            <span>📝 ${getQuestionTypeLabel(item.questionType)}</span>
+                        </div>
+                        <div class="ww-item-answer">
+                            <span class="label">你的答案：</span>
+                            <span class="user-val">${escapeHtml(item.userAnswer || '未作答')}</span>
+                        </div>
+                        <div class="ww-item-answer">
+                            <span class="label">正确答案：</span>
+                            <span class="correct-val">${escapeHtml(item.correctTranslation)}</span>
+                        </div>
+                        <div class="ww-item-time">${formatTime(item.createTime)}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        $list.html(html);
+    }
+
+    function loadWrongWords() {
+        const project = $projectSelect.val();
+
+        $.getJSON('/test/wrong-words/list', {project: project})
+            .done(function (response) {
+                if (response.code === 200) {
+                    renderList(response.data);
+                    return;
+                }
+                $list.html(`
+                    <div class="ww-empty">
+                        <span class="ww-empty-icon">⚠️</span>
+                        <div class="ww-empty-title">加载失败</div>
+                        <div class="ww-empty-desc">${escapeHtml(response.message || '加载错题失败')}</div>
+                    </div>
+                `);
+                $count.text('0');
+            })
+            .fail(function () {
+                $list.html(`
+                    <div class="ww-empty">
+                        <span class="ww-empty-icon">⚠️</span>
+                        <div class="ww-empty-title">网络错误</div>
+                        <div class="ww-empty-desc">加载失败，请稍后重试。</div>
+                    </div>
+                `);
+                $count.text('0');
+            });
+    }
+
+    $projectSelect.on('change', loadWrongWords);
+    $refreshBtn.on('click', loadWrongWords);
+
+    // 初始加载
+    loadWrongWords();
+});
+</script>
+</body>
+</html>

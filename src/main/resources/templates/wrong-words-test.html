@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>错题测试</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" th:href="@{/css/test.css}">
+    <link rel="stylesheet" th:href="@{/css/wrong-words.css}">
+    <script th:src="@{/js/jquery-4.0.0.min.js}"></script>
+    <script th:src="@{/js/wrong-words-test.js}"></script>
+</head>
+<body>
+<div class="container wt-page">
+    <div th:replace="~{fragments/navigation :: topNav('wrong-words')}"></div>
+
+    <div class="hero wt-hero">
+        <h1>📝 错题专项测试</h1>
+        <p>针对错题本中的单词进行专项练习，帮助你巩固记忆。请选择项目后开始测试。</p>
+    </div>
+
+    <div class="card wt-panel">
+        <div class="wt-toolbar">
+            <div class="form-group project-group">
+                <label for="wtProjectSelect">筛选项目</label>
+                <select id="wtProjectSelect" class="input">
+                    <option value="">全部项目</option>
+                    <option value="CET4">CET4</option>
+                    <option value="CET6">CET6</option>
+                </select>
+            </div>
+            <button type="button" id="wtStartBtn" class="btn primary">开始错题测试</button>
+        </div>
+
+        <div class="wt-intro" id="wtIntro">
+            <div class="alert info wt-status">选择项目后点击开始测试，题目将来自你的错题本。</div>
+        </div>
+
+        <div id="wtWorkspace" class="wt-workspace" style="display:none;">
+            <div id="wtStatusBar" class="alert info wt-status">正在准备题目…</div>
+
+            <form id="wtForm" class="stack-form">
+                <div id="wtQuestionList" class="wt-question-list"></div>
+
+                <div class="wt-actions">
+                    <button type="button" id="wtSubmitBtn" class="btn primary" disabled>提交并保存</button>
+                    <button type="button" id="wtResetBtn" class="btn ghost">重新开始</button>
+                    <a th:href="@{/test/wrong-words}" class="btn ghost">返回错题本</a>
+                </div>
+            </form>
+
+            <div id="wtResultPanel" class="wt-result" style="display:none;"></div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
