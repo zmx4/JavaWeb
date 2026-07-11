@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英语测试</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" th:href="@{/css/test.css}">
+    <script th:src="@{/js/jquery-4.0.0.min.js}"></script>
+    <script th:src="@{/js/test.js}"></script>
+</head>
+<body>
+<div class="container test-page">
+    <div th:replace="~{fragments/navigation :: topNav('test')}"></div>
+
+    <div class="hero test-hero">
+        <h1>测试中心</h1>
+        <p>选择 CET4 或 CET6 题库后点击开始测试，再按分区完成选择题和填空题。测试内容在点击开始前不会显示。</p>
+    </div>
+
+    <div class="card test-panel">
+        <div class="test-toolbar">
+            <div class="form-group project-group">
+                <label for="projectSelect">测试项目</label>
+                <select id="projectSelect" class="input">
+                    <option value="CET4">CET4</option>
+                    <option value="CET6">CET6</option>
+                </select>
+            </div>
+            <button type="button" id="startTestBtn" class="btn primary">开始测试</button>
+        </div>
+
+        <div class="test-intro" id="testIntro">
+            <div class="alert info test-status">选择项目后点击开始测试，题目内容会在此之后才加载并显示。</div>
+        </div>
+
+        <div id="testWorkspace" class="test-workspace" style="display:none;">
+            <div id="statusBar" class="alert info test-status">正在准备题目。</div>
+
+            <form id="testForm" class="stack-form test-form">
+                <div id="questionList" class="question-list"></div>
+
+                <div class="test-actions">
+                    <button type="button" id="submitTestBtn" class="btn primary" disabled>提交并保存</button>
+                    <button type="button" id="resetTestBtn" class="btn ghost">重新开始</button>
+                </div>
+            </form>
+
+            <div id="resultPanel" class="test-result" style="display:none;"></div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试结果</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" th:href="@{/css/test.css}">
+</head>
+<body>
+<div class="container test-page">
+    <div th:replace="~{fragments/navigation :: topNav('test')}"></div>
+
+    <div class="hero test-hero">
+        <h1>测试结果</h1>
+        <p>本次测试已完成，下面显示得分和答错的单词。</p>
+    </div>
+
+    <div class="card test-panel">
+        <div class="result-summary result-summary-large">
+            <div>
+                <span class="result-number" th:text="${latestResult.correctCount}">0</span>
+                <span class="result-label">正确</span>
+            </div>
+            <div>
+                <span class="result-number" th:text="${latestResult.wrongCount}">0</span>
+                <span class="result-label">错误</span>
+            </div>
+            <div>
+                <span class="result-number" th:text="${latestResult.savedCount}">0</span>
+                <span class="result-label">已保存</span>
+            </div>
+        </div>
+
+        <div class="alert success result-banner">
+            <span>测试已提交并保存。</span>
+            <a th:href="@{/test}" class="result-back-link">返回重新测试</a>
+        </div>
+
+        <div class="result-section">
+            <h3>答错单词</h3>
+            <div th:if="${#lists.isEmpty(wrongWords)}" class="result-empty">本次没有答错的单词。</div>
+            <div th:if="${not #lists.isEmpty(wrongWords)}" class="wrong-list">
+                <div class="wrong-item" th:each="item, stat : ${wrongWords}">
+                    <div class="wrong-index" th:text="${stat.index + 1}"></div>
+                    <div class="wrong-content">
+                        <div class="wrong-word" th:text="${item.word}"></div>
+                        <div class="wrong-meta">
+                            <span th:text="${item.questionType == 'choice' ? '选择题' : '填空题'}"></span>
+                            <span>你的答案：<strong th:text="${item.userAnswer == null || #strings.isEmpty(item.userAnswer) ? '未作答' : item.userAnswer}"></strong></span>
+                        </div>
+                        <div class="wrong-correct">正确答案：<span th:text="${item.questionType == 'choice' ? item.correctTranslation : item.word}"></span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

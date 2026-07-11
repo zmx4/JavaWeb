@@ -4,43 +4,64 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>单词查询</title>
+    <!-- 全局样式 -->
     <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <!-- 单词查询页面专属样式 -->
+    <link rel="stylesheet" th:href="@{/css/dictionary.css}">
 </head>
 <body>
-<div class="container">
-    <div th:replace="~{fragments/navigation :: topNav('dictionary')}"></div>
+    <div class="container">
+        <!-- 导航栏片段 -->
+        <div th:replace="~{fragments/navigation :: topNav('dictionary')}"></div>
 
-    <div class="hero">
-        <h1>单词查询</h1>
-        <p>输入单词后，系统会按 dictionary.word 查询对应释义。</p>
-    </div>
+        <!-- Hero 区域 -->
+        <div class="hero">
+            <h1>
+                <span class="hero-icon">📖</span>单词查询
+            </h1>
+            <p>输入单词后，系统会按 <strong>dictionary.word</strong> 查询对应释义，快速获取翻译结果。</p>
+        </div>
 
-    <div class="card">
-        <form th:action="@{/dictionary}" method="get" class="form-row">
-            <div class="full">
-                <label for="word">查询单词</label>
-                <input id="word" name="word" class="input" type="text" th:value="${searchWord}" placeholder="请输入要查询的单词">
+        <!-- 搜索卡片 -->
+        <div class="dictionary-card">
+            <form th:action="@{/dictionary}" method="get" class="search-bar">
+                <div class="search-input-wrap">
+                    <span class="search-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="10.5" cy="10.5" r="7.5"/>
+                        <line x1="16" y1="16" x2="21.5" y2="21.5"/>
+                    </svg>
+                </span>
+                <input
+                id="word"
+                name="word"
+                class="search-input"
+                type="text"
+                th:value="${searchWord}"
+                placeholder="请输入要查询的单词…"
+                autocomplete="off"
+                autofocus
+                >
             </div>
-            <div class="full">
-                <button type="submit" class="btn primary">查 询</button>
-            </div>
+            <button type="submit" class="search-btn">
+                查 询
+            </button>
         </form>
 
+        <!-- 错误提示 -->
         <div th:if="${error}" class="alert danger" th:text="${error}"></div>
 
-        <div th:if="${dictionaryEntry}" class="mt-2">
-            <table class="table">
-                <tbody>
-                <tr>
-                    <th>单词</th>
-                    <td th:text="${dictionaryEntry.word}"></td>
-                </tr>
-                <tr>
-                    <th>释义</th>
-                    <td th:text="${dictionaryEntry.translation}"></td>
-                </tr>
-                </tbody>
-            </table>
+        <!-- 查询结果卡片 -->
+        <div th:if="${dictionaryEntry}" class="result-card">
+            <div class="result-word" th:text="${dictionaryEntry.word}"></div>
+            <div class="result-divider"></div>
+            <div class="result-translation" th:text="${dictionaryEntry.translation}"></div>
+        </div>
+
+        <!-- 未查询时的引导提示 -->
+        <div th:if="${error == null and dictionaryEntry == null}" class="search-hint">
+            💡 试试输入一个英文单词，比如 <em>serendipity</em> 或 <em>ephemeral</em>
         </div>
     </div>
 </div>
