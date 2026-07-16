@@ -37,8 +37,6 @@ package "shop.entity" #EFF6FF {
     note bottom of User
         @TableName("users")
     end note
-    note right of User::id : <<PK>> AUTO_INCREMENT
-
     class TestRecord <<entity>> {
         + Long id
         + Long userId
@@ -163,8 +161,9 @@ package "shop.service.impl" #ECFDF5 {
         - Cet4Mapper cet4Mapper
         - Cet6Mapper cet6Mapper
     }
-    note right of TestServiceImpl::cet4Mapper
-        构造器注入
+    note right of TestServiceImpl
+        cet4Mapper / cet6Mapper
+        通过构造器注入
     end note
     ServiceImpl <|-- TestServiceImpl : extends
     TestServiceImpl ..|> TestService : implements

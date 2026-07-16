@@ -62,7 +62,7 @@ partition "HomeController (返回)" {
 partition "浏览器端 (渲染)" {
     if (error 存在) then (是)
         :显示红色错误提示框;
-    else (dictionaryEntry 存在) then (是)
+    elseif (dictionaryEntry 存在) then (是)
         :显示单词卡片\n(word + translation);
     else
         :显示引导提示\n(搜索建议);
